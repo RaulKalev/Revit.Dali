@@ -1,0 +1,30 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userprefs
+
+# Revit
+*.slog
+*.rvt
+*.rfa
+*_backup.rvt
+*_backup.rfa
+Journals/
+
+# Antigravity / Gemini
+.gemini/
+.agent/
+brain/
+task.md
+implementation_plan.md
+walkthrough.md
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
