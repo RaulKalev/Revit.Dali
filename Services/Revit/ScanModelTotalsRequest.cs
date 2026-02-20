@@ -101,36 +101,35 @@ namespace Dali.Services.Revit
                     string lineIdValue = lineParam.AsString()?.Trim();
                     if (string.IsNullOrEmpty(lineIdValue)) continue;
 
-                    // Read mA + addresses from type (cached)
-                    ElementId typeId = element.GetTypeId();
-#if NET48
-                    if (typeId == null || typeId == ElementId.InvalidElementId) continue;
-                    long typeKey = (long)typeId.IntegerValue;
-#else
-                    if (typeId == ElementId.InvalidElementId) continue;
-                    long typeKey = typeId.Value;
-#endif
-
-                    if (!typeCache.TryGetValue(typeKey, out var cached))
+                    string ctrlValue = string.Empty;
+                    if (!string.IsNullOrWhiteSpace(_settings.Param_Controller))
                     {
-                        cached = ReadTypeParams(doc, typeId);
-                        typeCache[typeKey] = cached;
+                        Parameter ctrlParam = element.LookupParameter(_settings.Param_Controller);
+                        if (ctrlParam != null)
+                        {
+                            ctrlValue = ctrlParam.StorageType == StorageType.String ? ctrlParam.AsString()?.Trim() : ctrlParam.AsValueString()?.Trim();
+                        }
                     }
+                    if (ctrlValue == null) ctrlValue = string.Empty;
 
-                    // Accumulate into the line bucket
-                    if (!result.ByLine.TryGetValue(lineIdValue, out var totals))
+                    // Read mA + addresses directly from instance, fallback to type
+                    var data = ReadParams(doc, element);
+
+                    // Accumulate into the line bucket using composite key: "Controller||Line"
+                    string compositeKey = $"{ctrlValue}||{lineIdValue}";
+                    if (!result.ByLine.TryGetValue(compositeKey, out var totals))
                     {
                         totals = new ModelScanResult.LineTotals();
-                        result.ByLine[lineIdValue] = totals;
+                        result.ByLine[compositeKey] = totals;
                     }
 
-                    totals.LoadmA += cached.LoadmA;
-                    totals.AddressCount += cached.AddressCount;
+                    totals.LoadmA += data.LoadmA;
+                    totals.AddressCount += data.AddressCount;
                     totals.ElementCount++;
                     matched++;
                 }
 
-                App.Logger?.Info($"ScanModelTotals: scanned {scanned} elements, matched {matched} into {result.ByLine.Count} line(s).");
+                App.Logger?.Info($"ScanModelTotals: scanned {scanned} elements, matched {matched} into {result.ByLine.Count} distinct controller/line combo(s).");
             }
             catch (Exception ex)
             {
@@ -141,23 +140,48 @@ namespace Dali.Services.Revit
             DispatchResult(result);
         }
 
-        private CachedType ReadTypeParams(Document doc, ElementId typeId)
+        private CachedType ReadParams(Document doc, Element instanceElement)
         {
             var cached = new CachedType();
-            Element typeElement = doc.GetElement(typeId);
-            if (typeElement is FamilySymbol symbol)
+
+            // 1. Try LoadmA
+            if (!string.IsNullOrWhiteSpace(_settings.Param_Load))
             {
-                if (!string.IsNullOrWhiteSpace(_settings.Param_Load))
+                Parameter pInstance = instanceElement.LookupParameter(_settings.Param_Load);
+                if (pInstance != null && pInstance.HasValue) 
                 {
-                    Parameter p = symbol.LookupParameter(_settings.Param_Load);
-                    if (p != null) cached.LoadmA = ReadDouble(p);
+                    cached.LoadmA = ReadDouble(pInstance);
                 }
-                if (!string.IsNullOrWhiteSpace(_settings.Param_AddressCount))
+                else
                 {
-                    Parameter p = symbol.LookupParameter(_settings.Param_AddressCount);
-                    if (p != null) cached.AddressCount = ReadInt(p);
+                    Element typeElement = doc.GetElement(instanceElement.GetTypeId());
+                    if (typeElement is FamilySymbol symbol)
+                    {
+                        Parameter pType = symbol.LookupParameter(_settings.Param_Load);
+                        if (pType != null) cached.LoadmA = ReadDouble(pType);
+                    }
                 }
             }
+
+            // 2. Try AddressCount
+            if (!string.IsNullOrWhiteSpace(_settings.Param_AddressCount))
+            {
+                Parameter pInstance = instanceElement.LookupParameter(_settings.Param_AddressCount);
+                if (pInstance != null && pInstance.HasValue)
+                {
+                    cached.AddressCount = ReadInt(pInstance);
+                }
+                else
+                {
+                    Element typeElement = doc.GetElement(instanceElement.GetTypeId());
+                    if (typeElement is FamilySymbol symbol)
+                    {
+                        Parameter pType = symbol.LookupParameter(_settings.Param_AddressCount);
+                        if (pType != null) cached.AddressCount = ReadInt(pType);
+                    }
+                }
+            }
+
             return cached;
         }
 
@@ -189,11 +213,10 @@ namespace Dali.Services.Revit
 
         private void DispatchResult(ModelScanResult result)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-                dispatcher.Invoke(() => _callback(result));
-            else
-                _callback(result);
+            // ExternalEvent.Execute() already runs on the main UI thread.
+            // Using Dispatcher.BeginInvoke crashes Revit 2026 because Revit
+            // suspends WPF Dispatcher processing during ExternalEvent execution.
+            _callback(result);
         }
 
         private class CachedType
@@ -203,3 +226,5 @@ namespace Dali.Services.Revit
         }
     }
 }
+
+

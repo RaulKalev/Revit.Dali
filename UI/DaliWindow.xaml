@@ -37,6 +37,33 @@
             <ui:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <ui:NullToCollapsedConverter x:Key="NullToCollapsedConverter"/>
             
+            <Style TargetType="{x:Type TabItem}">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabItem}">
+                            <Border x:Name="Border" Padding="16,8" Margin="0,0,4,0"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent" BorderThickness="0,0,0,2">
+                                <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center" HorizontalAlignment="Center"
+                                        ContentSource="Header" RecognizesAccessKey="True" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="#70babc" />
+                                    <Setter Property="Foreground" Value="#70babc" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#1AFFFFFF" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
             <Style x:Key="CustomCancelButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource CustomActionButtonStyle}">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -151,19 +178,19 @@
                     </ToggleButton.Template>
                 </ToggleButton>
 
-                <!-- Main Content (Row 1) - TabControl with Batch Setup + Grouping -->
+                <!-- Main Content (Row 1) - TabControl with Grouping + Batch Setup -->
                 <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="10,5,10,10"
                             Background="{DynamicResource PrimaryBackgroundBrush}"
                             BorderThickness="0"
                             Foreground="{DynamicResource ForegroundBrush}">
                     
-                    <!-- Tab 1: Batch Setup -->
-                    <TabItem x:Name="BatchSetupTab" Header="Batch Setup">
-                        <ui:BatchSetupView x:Name="BatchSetupViewControl" Margin="0,5,0,0"/>
-                    </TabItem>
-                    <!-- Tab 2: Grouping -->
+                    <!-- Tab 1: Grouping -->
                     <TabItem x:Name="GroupingTab" Header="Grouping">
                         <ui:GroupingView x:Name="GroupingViewControl" Margin="0,5,0,0"/>
+                    </TabItem>
+                    <!-- Tab 2: Batch Setup -->
+                    <TabItem x:Name="BatchSetupTab" Header="Batch Setup">
+                        <ui:BatchSetupView x:Name="BatchSetupViewControl" Margin="0,5,0,0"/>
                     </TabItem>
                 </TabControl>
 

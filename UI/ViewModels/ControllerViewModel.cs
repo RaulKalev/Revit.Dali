@@ -17,20 +17,32 @@ namespace Dali.UI.ViewModels
         private readonly Action<ControllerViewModel> _addLineAction;
         private readonly Action<ControllerViewModel> _deleteAction;
         private readonly Action<LineViewModel> _addToLineAction;
+        private readonly Action<LineViewModel> _interactiveAddAction;
         private readonly Action<ControllerViewModel> _onExpanded; // Called so parent can collapse siblings
+        private readonly Action<ControllerViewModel> _onNameChanged;
+        private readonly Action<LineViewModel> _onLineNameChanged;
+        private readonly Action<LineViewModel> _changeColorAction;
 
         public ControllerViewModel(
             ControllerDefinition model,
             Action<ControllerViewModel> addLineAction,
             Action<ControllerViewModel> deleteAction,
             Action<LineViewModel> addToLineAction,
-            Action<ControllerViewModel> onExpanded)
+            Action<LineViewModel> interactiveAddAction,
+            Action<ControllerViewModel> onExpanded,
+            Action<ControllerViewModel> onNameChanged = null,
+            Action<LineViewModel> onLineNameChanged = null,
+            Action<LineViewModel> changeColorAction = null)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _addLineAction = addLineAction;
             _deleteAction = deleteAction;
             _addToLineAction = addToLineAction;
+            _interactiveAddAction = interactiveAddAction;
             _onExpanded = onExpanded;
+            _onNameChanged = onNameChanged;
+            _onLineNameChanged = onLineNameChanged;
+            _changeColorAction = changeColorAction;
 
             Lines = new ObservableCollection<LineViewModel>();
             foreach (var lineDef in model.Lines)
@@ -60,6 +72,7 @@ namespace Dali.UI.ViewModels
                     // Sync controller name to all child lines
                     foreach (var line in Lines)
                         line.ControllerName = value;
+                    _onNameChanged?.Invoke(this);
                 }
             }
         }
@@ -161,6 +174,10 @@ namespace Dali.UI.ViewModels
             var vm = CreateLineVM(def);
             vm.IsExpanded = true;
             Lines.Add(vm);
+            
+            // Instantly trigger a model scan for this newly created line so it picks up pre-existing devices.
+            _onLineNameChanged?.Invoke(vm);
+            
             return vm;
         }
 
@@ -182,7 +199,10 @@ namespace Dali.UI.ViewModels
             return new LineViewModel(
                 def,
                 line => _addToLineAction?.Invoke(line),
-                line => DeleteLine(line));
+                line => DeleteLine(line),
+                line => _interactiveAddAction?.Invoke(line),
+                line => { _onLineNameChanged?.Invoke(line); },
+                line => { _changeColorAction?.Invoke(line); });
         }
 
         public ICommand AddLineCommand { get; }

@@ -89,7 +89,7 @@ namespace Dali.Services
                 
                 var win = new UI.ChangelogWindow(newerVersions);
                 win.Owner = owner;
-                win.ShowDialog();
+                win.Show(); // Modeless to prevent Dispatcher suspension crash during startup ExternalEvent execution
 
                 // 5. Update State to newest
                 state.LastShownVersion = newest.Version;

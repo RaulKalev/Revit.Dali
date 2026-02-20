@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Dali.UI.ViewModels
 {
@@ -30,22 +31,22 @@ namespace Dali.UI.ViewModels
             _highlightRegistry = new HighlightRegistry();
 
             Warnings = new ObservableCollection<string>();
-            Controllers = new ObservableCollection<ControllerViewModel>();
+            Panels = new ObservableCollection<PanelViewModel>();
 
             RefreshSelectionCommand = new RelayCommand(_ => RefreshSelection(), _ => !IsBusy);
             ResetOverridesCommand = new RelayCommand(_ => ResetOverrides(), _ => !IsBusy);
-            AddControllerCommand = new RelayCommand(_ => AddController());
+            AddPanelCommand = new RelayCommand(_ => AddPanel());
 
             // Subscribe to settings changes
             _settingsService.OnSettingsSaved += OnSettingsSaved;
 
-            LoadControllers();
+            LoadPanels();
             ScanModelOnStartup();
         }
 
-        // ---- Controller hierarchy ----
+        // ---- Panel/Controller hierarchy ----
 
-        public ObservableCollection<ControllerViewModel> Controllers { get; }
+        public ObservableCollection<PanelViewModel> Panels { get; }
 
         private ControllerViewModel _activeController;
         /// <summary>The currently expanded controller. Drives the main gauges.</summary>
@@ -55,10 +56,10 @@ namespace Dali.UI.ViewModels
             private set => SetProperty(ref _activeController, value);
         }
 
-        private void LoadControllers()
+        private void LoadPanels()
         {
             var settings = _settingsService.Load();
-            Controllers.Clear();
+            Panels.Clear();
 
             // Apply global limits from settings
             _controllerMaxLoadmA = settings.ControllerMaxLoadmA > 0 ? settings.ControllerMaxLoadmA : 250.0;
@@ -66,46 +67,69 @@ namespace Dali.UI.ViewModels
             _lineMaxLoadmA = settings.LineMaxLoadmA > 0 ? settings.LineMaxLoadmA : 250.0;
             _lineMaxAddressCount = settings.LineMaxAddressCount > 0 ? settings.LineMaxAddressCount : 64;
 
-            if (settings.SavedControllers != null)
+            if (settings.SavedPanels != null && settings.SavedPanels.Count > 0)
             {
-                foreach (var ctrlDef in settings.SavedControllers)
-                    Controllers.Add(CreateControllerVM(ctrlDef));
+                foreach (var panelDef in settings.SavedPanels)
+                    Panels.Add(CreatePanelVM(panelDef));
             }
-
-            // Default if empty
-            if (Controllers.Count == 0)
+            else
             {
-                var def = new ControllerDefinition { Name = "Controller 1" };
-                def.Lines.Add(new LineDefinition { Name = "Line 1", ControllerName = "Controller 1" });
-                Controllers.Add(CreateControllerVM(def));
-                SaveControllers();
+                // Default if empty
+                var defCtrl = new ControllerDefinition { Name = "Controller 1" };
+                defCtrl.Lines.Add(new LineDefinition { Name = "Line 1", ControllerName = "Controller 1" });
+                var pDef = new PanelDefinition { Name = "Panel 1" };
+                pDef.Controllers.Add(defCtrl);
+                
+                Panels.Add(CreatePanelVM(pDef));
+                SavePanels();
             }
 
             // Propagate limits to all controllers
-            foreach (var c in Controllers)
+            foreach (var p in Panels)
             {
-                c.MaxLoadmA = _controllerMaxLoadmA;
-                c.MaxAddressCount = _controllerMaxAddressCount;
-                foreach (var line in c.Lines)
+                foreach (var c in p.Controllers)
                 {
-                    line.MaxLoadmA = _lineMaxLoadmA;
-                    line.MaxAddressCount = _lineMaxAddressCount;
+                    c.MaxLoadmA = _controllerMaxLoadmA;
+                    c.MaxAddressCount = _controllerMaxAddressCount;
+                    foreach (var line in c.Lines)
+                    {
+                        line.MaxLoadmA = _lineMaxLoadmA;
+                        line.MaxAddressCount = _lineMaxAddressCount;
+                    }
                 }
             }
 
-            // Open first controller by default
-            if (Controllers.Count > 0)
-                Controllers[0].IsExpanded = true;
+            // Open first panel and first controller by default
+            if (Panels.Count > 0)
+            {
+                Panels[0].IsExpanded = true;
+                if (Panels[0].Controllers.Count > 0)
+                    Panels[0].Controllers[0].IsExpanded = true;
+            }
+        }
+
+        private PanelViewModel CreatePanelVM(PanelDefinition pDef)
+        {
+            return new PanelViewModel(
+                pDef,
+                p => { p.AddNewController(CreateControllerVM); SavePanels(); },
+                p => { DeletePanel(p); SavePanels(); },
+                CreateControllerVM
+            );
         }
 
         private ControllerViewModel CreateControllerVM(ControllerDefinition def)
         {
             var vm = new ControllerViewModel(
                 def,
-                ctrl => { AddNewLine(ctrl); SaveControllers(); },
-                ctrl => { DeleteController(ctrl); SaveControllers(); },
+                ctrl => { AddNewLine(ctrl); SavePanels(); },
+                ctrl => { DeleteController(ctrl); SavePanels(); },
                 line => AddToLine(line),
-                ctrl => OnControllerExpanded(ctrl));
+                line => AddToLineInteractive(line),
+                ctrl => OnControllerExpanded(ctrl),
+                ctrl => OnControllerNameChanged(ctrl),
+                line => OnLineNameChanged(line),
+                line => OnChangeLineColor(line));
             
             vm.MaxLoadmA = _controllerMaxLoadmA;
             vm.MaxAddressCount = _controllerMaxAddressCount;
@@ -120,36 +144,116 @@ namespace Dali.UI.ViewModels
             return vm;
         }
 
+        private void OnControllerNameChanged(ControllerViewModel ctrl)
+        {
+            SavePanels();
+            foreach (var line in ctrl.Lines)
+            {
+                RecalculateLine(line);
+            }
+        }
+
+        internal void OnLineNameChanged(LineViewModel line)
+        {
+            SavePanels();
+            RecalculateLine(line);
+        }
+
+        private void OnChangeLineColor(LineViewModel line)
+        {
+            var dialog = new System.Windows.Forms.ColorDialog();
+            
+            // pre-select current color if valid
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(line.ColorHex))
+                {
+                    var mediaColor = (System.Windows.Media.Color)ColorConverter.ConvertFromString(line.ColorHex);
+                    dialog.Color = System.Drawing.Color.FromArgb(mediaColor.A, mediaColor.R, mediaColor.G, mediaColor.B);
+                }
+            }
+            catch { /* ignore invalid hex */ }
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                // Convert System.Drawing.Color -> Hex string
+                string hex = $"#{dialog.Color.R:X2}{dialog.Color.G:X2}{dialog.Color.B:X2}";
+                line.ColorHex = hex;
+                SavePanels();
+
+                var settings = _settingsService.Load();
+                _eventService.Raise(new UpdateLineColorRequest(
+                    settings, 
+                    line.ControllerName, 
+                    line.Name, 
+                    hex, 
+                    _highlightRegistry));
+            }
+        }
+
+        private void RecalculateLine(LineViewModel line)
+        {
+            if (string.IsNullOrWhiteSpace(line.Name)) return;
+
+            var settings = _settingsService.Load();
+            var req = new RecalculateLineGaugesRequest(
+                settings,
+                line.Name,
+                line.ControllerName,
+                (load, addr) => 
+                {
+                    line.LoadmA = load;
+                    line.AddressCount = addr;
+                    var parentCtrl = Panels.SelectMany(p => p.Controllers).FirstOrDefault(c => c.Lines.Contains(line));
+                    parentCtrl?.RecalcTotals();
+                });
+            _eventService.Raise(req);
+        }
+
         private void OnControllerExpanded(ControllerViewModel expanded)
         {
-            // Accordion: collapse all others
-            foreach (var ctrl in Controllers)
+            // Accordion: collapse all others across all panels
+            foreach (var panel in Panels)
             {
-                if (ctrl != expanded && ctrl.IsExpanded)
-                    ctrl.IsExpanded = false;
+                foreach (var ctrl in panel.Controllers)
+                {
+                    if (ctrl != expanded && ctrl.IsExpanded)
+                        ctrl.IsExpanded = false;
+                }
             }
             ActiveController = expanded;
         }
 
-        public ICommand AddControllerCommand { get; }
+        public ICommand AddPanelCommand { get; }
 
-        private void AddController()
+        private void AddPanel()
         {
-            var def = new ControllerDefinition { Name = $"Controller {Controllers.Count + 1}" };
-            def.Lines.Add(new LineDefinition { Name = "Line 1", ControllerName = def.Name });
-            var vm = CreateControllerVM(def);
-            Controllers.Add(vm);
-            vm.IsExpanded = true; // triggers accordion via OnControllerExpanded
-            SaveControllers();
+            var pDef = new PanelDefinition { Name = $"Panel {Panels.Count + 1}" };
+            var vm = CreatePanelVM(pDef);
+            Panels.Add(vm);
+            vm.IsExpanded = true;
+            SavePanels();
+        }
+
+        private void DeletePanel(PanelViewModel panel)
+        {
+            if (Panels.Contains(panel))
+            {
+                Panels.Remove(panel);
+            }
         }
 
         private void DeleteController(ControllerViewModel ctrl)
         {
-            if (Controllers.Contains(ctrl))
+            foreach (var panel in Panels)
             {
-                Controllers.Remove(ctrl);
-                if (ActiveController == ctrl)
-                    ActiveController = Controllers.FirstOrDefault();
+                if (panel.Controllers.Contains(ctrl))
+                {
+                    panel.RemoveController(ctrl);
+                    if (ActiveController == ctrl)
+                        ActiveController = Panels.SelectMany(p => p.Controllers).FirstOrDefault();
+                    break;
+                }
             }
         }
 
@@ -160,12 +264,12 @@ namespace Dali.UI.ViewModels
             line.MaxAddressCount = _lineMaxAddressCount;
         }
 
-        public void SaveControllers()
+        public void SavePanels()
         {
             var settings = _settingsService.Load();
-            settings.SavedControllers = new List<ControllerDefinition>();
-            foreach (var ctrl in Controllers)
-                settings.SavedControllers.Add(ctrl.Model);
+            settings.SavedPanels = new List<PanelDefinition>();
+            foreach (var panel in Panels)
+                settings.SavedPanels.Add(panel.Model);
             _settingsService.Save(settings);
         }
 
@@ -187,14 +291,17 @@ namespace Dali.UI.ViewModels
             OnPropertyChanged(nameof(IsOverAddressLimit));
 
             // Propagate to all existing controllers and lines
-            foreach (var c in Controllers)
+            foreach (var p in Panels)
             {
-                c.MaxLoadmA = _controllerMaxLoadmA;
-                c.MaxAddressCount = _controllerMaxAddressCount;
-                foreach (var line in c.Lines)
+                foreach (var c in p.Controllers)
                 {
-                    line.MaxLoadmA = _lineMaxLoadmA;
-                    line.MaxAddressCount = _lineMaxAddressCount;
+                    c.MaxLoadmA = _controllerMaxLoadmA;
+                    c.MaxAddressCount = _controllerMaxAddressCount;
+                    foreach (var line in c.Lines)
+                    {
+                        line.MaxLoadmA = _lineMaxLoadmA;
+                        line.MaxAddressCount = _lineMaxAddressCount;
+                    }
                 }
             }
         }
@@ -219,27 +326,45 @@ namespace Dali.UI.ViewModels
         {
             foreach (var kvp in result.ByLine)
             {
-                string lineName = kvp.Key;
+                string compositeKey = kvp.Key;
                 var totals = kvp.Value;
 
-                // Find the matching LineViewModel across all controllers
-                foreach (var ctrl in Controllers)
+                string ctrlName = string.Empty;
+                string lineName = compositeKey;
+
+                int separatorIndex = compositeKey.IndexOf("||");
+                if (separatorIndex >= 0)
                 {
-                    foreach (var line in ctrl.Lines)
+                    ctrlName = compositeKey.Substring(0, separatorIndex);
+                    lineName = compositeKey.Substring(separatorIndex + 2);
+                }
+
+                // Find the matching LineViewModel across all controllers
+                foreach (var p in Panels)
+                {
+                    foreach (var ctrl in p.Controllers)
                     {
-                        if (string.Equals(line.Name?.Trim(), lineName, StringComparison.OrdinalIgnoreCase))
+                        bool controllerMatches = string.IsNullOrEmpty(ctrlName) || 
+                                                 string.Equals(ctrl.Name?.Trim(), ctrlName, StringComparison.OrdinalIgnoreCase);
+
+                        if (!controllerMatches) continue;
+
+                        foreach (var line in ctrl.Lines)
                         {
-                            line.LoadmA = totals.LoadmA;
-                            line.AddressCount = totals.AddressCount;
+                            if (string.Equals(line.Name?.Trim(), lineName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                line.LoadmA = totals.LoadmA;
+                                line.AddressCount = totals.AddressCount;
+                            }
                         }
+                        ctrl.RecalcTotals();
                     }
-                    ctrl.RecalcTotals();
                 }
             }
 
             StatusMessage = result.Warnings.Count > 0
                 ? $"Scan complete with {result.Warnings.Count} warning(s)."
-                : $"Model scan complete — {result.ByLine.Count} line(s) populated.";
+                : $"Model scan complete — {result.ByLine.Count} distinct line(s) populated.";
 
             foreach (var w in result.Warnings)
             {
@@ -372,7 +497,7 @@ namespace Dali.UI.ViewModels
         private void AddToLine(LineViewModel line)
         {
             if (IsBusy || line == null || string.IsNullOrWhiteSpace(line.Name)) return;
-            SaveControllers();
+            SavePanels();
 
             var settings = _settingsService.Load();
             if (settings.IncludedCategories == null || settings.IncludedCategories.Count == 0)
@@ -392,7 +517,8 @@ namespace Dali.UI.ViewModels
                 MaxLoadmA,
                 MaxAddressCount,
                 _highlightRegistry,
-                OnAddToLineComplete);
+                OnAddToLineComplete,
+                line.ColorHex);
 
             _eventService.Raise(request);
         }
@@ -405,7 +531,7 @@ namespace Dali.UI.ViewModels
             Warnings.Clear();
             foreach (var d in result.Details) Warnings.Add(d);
 
-            // Update current selection totals
+            // Fetch the entire model's updated view of the selection.
             CurrentLoadmA = result.TotalLoadmA;
             CurrentAddressCount = result.TotalAddressCount;
             SelectedElementCount = result.UpdatedCount;
@@ -416,12 +542,10 @@ namespace Dali.UI.ViewModels
             OnPropertyChanged(nameof(IsOverLoadLimit));
             OnPropertyChanged(nameof(IsOverAddressLimit));
 
-            // Update per-line and per-controller gauges
+            // Force a true recalculation of the line to catch the full total
             if (_pendingLine != null && result.Success)
             {
-                // Find the parent controller
-                var parentCtrl = Controllers.FirstOrDefault(c => c.Lines.Contains(_pendingLine));
-                parentCtrl?.OnLineAddComplete(_pendingLine, result);
+                RecalculateLine(_pendingLine);
             }
             _pendingLine = null;
         }
@@ -440,6 +564,60 @@ namespace Dali.UI.ViewModels
             IsBusy = false;
             StatusMessage = result.Message;
             if (!result.Success) { Warnings.Clear(); Warnings.Add(result.Message); }
+        }
+        // ---- AddToLineInteractive (Interactive Loop) ----
+
+        private void AddToLineInteractive(LineViewModel line)
+        {
+            if (IsBusy || line == null || string.IsNullOrWhiteSpace(line.Name)) return;
+            SavePanels();
+
+            var settings = _settingsService.Load();
+            if (settings.IncludedCategories == null || settings.IncludedCategories.Count == 0)
+            { StatusMessage = "No categories configured in Settings."; return; }
+
+            if (string.IsNullOrWhiteSpace(settings.Param_LineId))
+            { StatusMessage = "Instance parameter (DALI_Line_ID) not configured in Settings."; return; }
+
+            IsBusy = true;
+            StatusMessage = $"Interactive Mode: Click devices to add to '{line.Name}'...";
+
+            // Find parent controller for updates
+            var parentCtrl = Panels.SelectMany(p => p.Controllers).FirstOrDefault(c => c.Lines.Contains(line));
+
+            var request = new AddDevicesInteractiveRequest(
+                settings,
+                line.Name,
+                line.ControllerName,
+                _highlightRegistry,
+                // Status Callback
+                msg => StatusMessage = msg,
+                // Update Callback (Delta)
+                (loadDelta, addrDelta) =>
+                {
+                    line.UpdateGaugesDelta(loadDelta, addrDelta);
+                    parentCtrl?.RecalcTotals(); // Update controller totals
+                    
+                    // Update global selection totals (approximate, since we don't re-scan the whole selection)
+                    CurrentLoadmA += loadDelta;
+                    CurrentAddressCount += addrDelta;
+                    SelectedElementCount++; 
+                },
+                // Completion Callback
+                () => OnInteractiveComplete(line),
+                line.ColorHex);
+
+            _eventService.Raise(request);
+        }
+
+        private void OnInteractiveComplete(LineViewModel line)
+        {
+            IsBusy = false;
+            StatusMessage = "Interactive selection finished.";
+            if (line != null)
+            {
+                RecalculateLine(line);
+            }
         }
     }
 }

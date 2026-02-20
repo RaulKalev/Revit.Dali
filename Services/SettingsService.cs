@@ -72,6 +72,25 @@ namespace Dali.Services
                             _logger.Info($"Migrated {settings.SavedControllers.Count} controller(s).");
                         }
 
+                        // Migrate SavedControllers -> hierarchical SavedPanels
+                        if (settings.Version < 4)
+                        {
+                            settings.Version = 4;
+                            if (settings.SavedControllers != null && settings.SavedControllers.Count > 0
+                                && (settings.SavedPanels == null || settings.SavedPanels.Count == 0))
+                            {
+                                _logger.Info("Migrating SavedControllers to SavedPanels hierarchy...");
+                                settings.SavedPanels = new System.Collections.Generic.List<PanelDefinition>();
+                                
+                                var defaultPanel = new PanelDefinition { Name = "Panel 1", Controllers = new System.Collections.Generic.List<ControllerDefinition>(settings.SavedControllers) };
+                                settings.SavedPanels.Add(defaultPanel);
+                                
+                                settings.SavedControllers.Clear();
+                            }
+                            Save(settings);
+                            _logger.Info("Migrated settings to version 4.");
+                        }
+
                         return settings;
                     }
                 }
@@ -89,7 +108,7 @@ namespace Dali.Services
             try
             {
                 // Ensure version is always current before saving
-                settings.Version = 3; 
+                settings.Version = 4; 
                 _logger.Info($"Saving settings version: {settings.Version}");
 
                 string json = JsonConvert.SerializeObject(settings, Formatting.Indented);

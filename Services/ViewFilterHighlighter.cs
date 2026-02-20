@@ -72,8 +72,10 @@ namespace Dali.Services
             Document doc,
             View view,
             SettingsModel settings,
+            string controllerName,
             string lineName,
-            HighlightRegistry registry)
+            HighlightRegistry registry,
+            string overrideColorHex = null)
         {
             var result = new HighlightResult();
 
@@ -84,102 +86,86 @@ namespace Dali.Services
                 return result;
             }
 
-            string filterName = $"DALI_Line_{lineName}";
-            string paramName = settings.Param_LineId;
+            string filterName = $"{controllerName} - {lineName}";
+            string paramLineIdName = settings.Param_LineId;
+            string paramControllerName = settings.Param_Controller;
 
-            // --- Step 1: Build the list of category IDs that support the filter parameter ---
-            var filterCategoryIds = new List<ElementId>();
-            var excludedCategories = new List<string>();
-
+            // --- Step 1: Query elements currently on this line and controller ---
+            var includedCategoryIds = new List<ElementId>();
             foreach (var bic in settings.IncludedCategories)
             {
-                var catId = new ElementId(bic);
-                // Check if the category supports the instance parameter for filtering.
-                // We try to verify by checking if any element in this category has the parameter.
-                // For ParameterFilterElement, we add categories optimistically and handle
-                // creation errors below.
-                filterCategoryIds.Add(catId);
+                includedCategoryIds.Add(new ElementId(bic));
             }
 
-            if (filterCategoryIds.Count == 0)
+            if (includedCategoryIds.Count == 0)
             {
-                result.Message = "No categories available for filter creation.";
+                result.Message = "No categories available to collect elements.";
                 return result;
             }
 
-            // --- Step 2: Find or create the ParameterFilterElement ---
-            // Collision-resilient: if a filter named "DALI_Line_<LineName>" already exists
-            // but is incompatible, try suffixed names ("DALI_Line_<LineName>__2", etc.)
-            ParameterFilterElement filterElement = FindExistingFilter(doc, filterName);
+            var elementsOnLine = new HashSet<ElementId>();
+            var collector = new FilteredElementCollector(doc);
+            
+            // Build a category filter to speed up collection
+            ElementMulticategoryFilter categoryFilter = new ElementMulticategoryFilter(includedCategoryIds);
+            collector.WherePasses(categoryFilter).WhereElementIsNotElementType();
 
-            if (filterElement == null)
+            foreach (Element e in collector)
             {
-                // Attempt creation with base name first, then suffixed names on conflict
-                string actualFilterName = filterName;
-                bool created = false;
+                Parameter lineParam = e.LookupParameter(paramLineIdName);
+                if (lineParam == null) continue;
 
-                for (int attempt = 0; attempt < 10 && !created; attempt++)
+                string elemLineName = lineParam.StorageType == StorageType.String ? lineParam.AsString() : lineParam.AsValueString();
+                if (elemLineName != lineName) continue;
+
+                // Also match controller if configured
+                if (!string.IsNullOrWhiteSpace(paramControllerName))
                 {
-                    if (attempt > 0)
+                    Parameter ctrlParam = e.LookupParameter(paramControllerName);
+                    if (ctrlParam != null)
                     {
-                        actualFilterName = $"{filterName}__{attempt + 1}";
-                        // Check if a suffixed filter already exists
-                        filterElement = FindExistingFilter(doc, actualFilterName);
-                        if (filterElement != null)
-                        {
-                            created = true;
-                            break;
-                        }
-                    }
-
-                    try
-                    {
-                        filterElement = CreateFilterWithRule(doc, actualFilterName, filterCategoryIds, paramName, lineName);
-                        created = true;
-                        if (attempt > 0)
-                        {
-                            App.Logger?.Warning($"ViewFilter: used suffixed name '{actualFilterName}' due to collision.");
-                            result.Message += $"Filter name collision; using '{actualFilterName}'. ";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (attempt == 0)
-                        {
-                            // First failure: try best-effort category subset before trying suffix
-                            filterElement = TryCreateFilterBestEffort(
-                                doc, actualFilterName, filterCategoryIds, paramName, lineName,
-                                excludedCategories, out string bestEffortWarning);
-
-                            if (filterElement != null)
-                            {
-                                created = true;
-                                if (!string.IsNullOrEmpty(bestEffortWarning))
-                                {
-                                    result.Message = bestEffortWarning + " ";
-                                }
-                            }
-                            else
-                            {
-                                App.Logger?.Warning($"ViewFilter: cannot create '{actualFilterName}': {ex.Message}. Trying suffixed name.");
-                            }
-                        }
-                        else
-                        {
-                            App.Logger?.Warning($"ViewFilter: suffix attempt '{actualFilterName}' failed: {ex.Message}.");
-                        }
+                        string elemCtrlName = ctrlParam.StorageType == StorageType.String ? ctrlParam.AsString() : ctrlParam.AsValueString();
+                        if (elemCtrlName != controllerName) continue;
                     }
                 }
 
-                if (filterElement == null)
+                elementsOnLine.Add(e.Id);
+            }
+
+
+            // --- Step 2: Find or create the SelectionFilterElement ---
+            SelectionFilterElement filterElement = FindExistingSelectionFilter(doc, filterName);
+
+            if (filterElement == null)
+            {
+                try
                 {
-                    result.Message = "Cannot create filter after multiple attempts.";
-                    App.Logger?.Error("ViewFilter: exhausted all naming attempts.");
+                    filterElement = SelectionFilterElement.Create(doc, filterName);
+                }
+                catch (Exception ex)
+                {
+                    result.Message = $"Cannot create SelectionFilterElement '{filterName}': {ex.Message}";
+                    App.Logger?.Error($"ViewFilter: failed to create selection filter: {ex.Message}");
                     return result;
                 }
             }
 
-            App.Logger?.Info($"ViewFilter: using filter '{filterElement.Name}' (Id {filterElement.Id}) for line '{lineName}'.");
+            // Replace contents of the selection filter
+            try
+            {
+                filterElement.Clear();
+                if (elementsOnLine.Count > 0)
+                {
+                    filterElement.AddSet(elementsOnLine);
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Message = $"Failed to update contents of '{filterName}': {ex.Message}";
+                return result;
+            }
+
+            App.Logger?.Info($"ViewFilter: using selection filter '{filterElement.Name}' (Id {filterElement.Id}) for {elementsOnLine.Count} elements.");
 
             // --- Step 3: Add filter to view if not already present ---
 #if NET48
@@ -223,19 +209,37 @@ namespace Dali.Services
                 }
                 catch (Exception ex)
                 {
-                    result.Message += $"Cannot add filter to view: {ex.Message}";
+                    result.Message += $"Cannot add selection filter to view: {ex.Message}";
                     return result;
                 }
             }
 
-            // --- Step 4: Set override graphics with a deterministic palette color ---
-            var color = PickColor(lineName, view, filterElement.Id);
+            // --- Step 4: Set override graphics with a deterministic palette color or explicitly provided color ---
+            Color color;
+            if (!string.IsNullOrWhiteSpace(overrideColorHex))
+            {
+                try
+                {
+                    // Format #RRGGBB => media color to revit color
+                    var mediaColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(overrideColorHex);
+                    color = new Color(mediaColor.R, mediaColor.G, mediaColor.B);
+                }
+                catch
+                {
+                    // Fallback to palette if invalid hex
+                    color = PickColor(filterName, view, filterElement.Id);
+                }
+            }
+            else
+            {
+                color = PickColor(filterName, view, filterElement.Id);
+            }
+
             result.ColorUsed = $"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}";
 
             var ogs = new OverrideGraphicSettings();
             ogs.SetProjectionLineColor(color);
             // Keep overrides minimal: only projection line color
-            // Fill patterns, weight, etc. are left at defaults
 
             try
             {
@@ -244,7 +248,7 @@ namespace Dali.Services
             }
             catch (Exception ex)
             {
-                result.Message += $"Filter added but override failed: {ex.Message}";
+                result.Message += $"Selection filter added but override failed: {ex.Message}";
                 return result;
             }
 
@@ -252,7 +256,8 @@ namespace Dali.Services
             registry.Track(viewIdVal, filterIdVal);
 
             result.Success = true;
-            result.Message += $"Highlighted '{lineName}' in view '{view.Name}' with color {result.ColorUsed}.";
+            result.ElementsOnLine = elementsOnLine;
+            result.Message += $"Highlighted {elementsOnLine.Count} items in '{filterName}' with color {result.ColorUsed}.";
             return result;
         }
 
@@ -337,149 +342,19 @@ namespace Dali.Services
         // -------------------------------------------------------
 
         /// <summary>
-        /// Finds an existing ParameterFilterElement by name.
+        /// Finds an existing SelectionFilterElement by name.
         /// </summary>
-        private static ParameterFilterElement FindExistingFilter(Document doc, string filterName)
+        private static SelectionFilterElement FindExistingSelectionFilter(Document doc, string filterName)
         {
             var collector = new FilteredElementCollector(doc)
-                .OfClass(typeof(ParameterFilterElement));
+                .OfClass(typeof(SelectionFilterElement));
 
             foreach (Element e in collector)
             {
-                if (e.Name == filterName && e is ParameterFilterElement pfe)
-                    return pfe;
+                if (e.Name == filterName && e is SelectionFilterElement sfe)
+                    return sfe;
             }
             return null;
-        }
-
-        /// <summary>
-        /// Creates a new ParameterFilterElement with a string-equals rule
-        /// on the mapped instance parameter.
-        ///
-        /// Filter rule construction:
-        ///   1. Resolve the shared/project parameter ID by name from any element instance
-        ///   2. Create a FilterStringRule: parameter EQUALS lineName
-        ///   3. Wrap in ElementParameterFilter
-        ///   4. Set as the element filter on the ParameterFilterElement
-        /// </summary>
-        private ParameterFilterElement CreateFilterWithRule(
-            Document doc,
-            string filterName,
-            IList<ElementId> categoryIds,
-            string paramName,
-            string lineName)
-        {
-            // Create the filter element (categories define which elements it applies to)
-            var filterElement = ParameterFilterElement.Create(doc, filterName, categoryIds);
-
-            // Build the filter rule: Param_LineId EQUALS lineName
-            // We need to find the parameter's ElementId. Look it up from a category.
-            ElementId paramId = ResolveParameterId(doc, categoryIds, paramName);
-
-            if (paramId != null && paramId != ElementId.InvalidElementId)
-            {
-                // Create the string equals rule.
-                // Revit 2023+ removed the caseSensitive parameter from string overloads.
-                var rule = ParameterFilterRuleFactory.CreateEqualsRule(paramId, lineName);
-                var elementFilter = new ElementParameterFilter(rule);
-                filterElement.SetElementFilter(elementFilter);
-            }
-
-            return filterElement;
-        }
-
-        /// <summary>
-        /// Best-effort filter creation: tries each category individually to find
-        /// which ones support the parameter, then creates the filter with only
-        /// compatible categories.
-        /// </summary>
-        private ParameterFilterElement TryCreateFilterBestEffort(
-            Document doc,
-            string filterName,
-            List<ElementId> allCategoryIds,
-            string paramName,
-            string lineName,
-            List<string> excludedCategories,
-            out string warningMessage)
-        {
-            warningMessage = null;
-            var compatibleIds = new List<ElementId>();
-
-            foreach (var catId in allCategoryIds)
-            {
-                try
-                {
-                    // Attempt to verify category compatibility
-                    // ParameterFilterElement.AllRuleParametersApplicable is available
-                    // but we use a simpler try-create approach
-                    compatibleIds.Add(catId);
-                }
-                catch
-                {
-                    // Category not compatible
-                    var cat = Category.GetCategory(doc, catId);
-                    excludedCategories.Add(cat?.Name ?? catId.ToString());
-                }
-            }
-
-            if (compatibleIds.Count == 0)
-            {
-                warningMessage = "No categories support the filter parameter.";
-                return null;
-            }
-
-            try
-            {
-                var filter = CreateFilterWithRule(doc, filterName, compatibleIds, paramName, lineName);
-                if (excludedCategories.Count > 0)
-                {
-                    warningMessage = $"Filter excludes categories: {string.Join(", ", excludedCategories)}.";
-                }
-                return filter;
-            }
-            catch (Exception ex)
-            {
-                warningMessage = $"Best-effort filter creation failed: {ex.Message}";
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Resolves the parameter ElementId by name, searching for an instance of
-        /// a category element that has the parameter. Falls back to iterating
-        /// categories until a match is found.
-        /// </summary>
-        private static ElementId ResolveParameterId(
-            Document doc,
-            IList<ElementId> categoryIds,
-            string paramName)
-        {
-            // Try each category until we find an element with the parameter
-            foreach (var catId in categoryIds)
-            {
-                try
-                {
-                    var collector = new FilteredElementCollector(doc)
-                        .OfCategoryId(catId)
-                        .WhereElementIsNotElementType();
-
-                    // Just get the first element to look up the parameter
-                    var firstElement = collector.FirstElement();
-                    if (firstElement == null) continue;
-
-                    Parameter param = firstElement.LookupParameter(paramName);
-                    if (param != null)
-                    {
-                        return param.Id;
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-
-            return ElementId.InvalidElementId;
         }
 
         /// <summary>

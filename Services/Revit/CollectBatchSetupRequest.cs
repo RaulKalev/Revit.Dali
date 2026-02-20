@@ -223,15 +223,9 @@ namespace Dali.Services.Revit
         /// </summary>
         private void DispatchResults(List<BatchSetupRowDto> rows)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                dispatcher.Invoke(() => _callback(rows));
-            }
-            else
-            {
-                _callback(rows);
-            }
+            _callback(rows);
         }
     }
 }
+
+

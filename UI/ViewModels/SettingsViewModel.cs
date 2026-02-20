@@ -167,16 +167,13 @@ namespace Dali.UI.ViewModels
             
             var request = new ValidateSettingsRequest(_parameterResolver, Settings, (result) =>
             {
-                // Marshal back to UI thread if needed (though ExternalEvent callbacks usually run on UI thread context in standard WPF/Revit hybrid, 
-                // but strictly speaking safe updates should happen via dispatcher if binding doesn't handle it)
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                // ExternalEvent.Execute() already runs on the main UI thread.
+                // No Dispatcher needed - direct callback is safe and avoids Revit 2026 crash.
+                ValidationStatus = result.IsValid ? "Validation Passed" : "Validation Failed";
+                foreach (var msg in result.Messages)
                 {
-                    ValidationStatus = result.IsValid ? "Validation Passed" : "Validation Failed";
-                    foreach (var msg in result.Messages)
-                    {
-                        ValidationMessages.Add(msg);
-                    }
-                });
+                    ValidationMessages.Add(msg);
+                }
             });
 
             _eventService.Raise(request);
@@ -194,3 +191,4 @@ namespace Dali.UI.ViewModels
         }
     }
 }
+

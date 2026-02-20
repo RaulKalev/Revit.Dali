@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
-    <BaseOutputPath>C:\Users\mibil\OneDrive\Desktop\DevDlls\Dali</BaseOutputPath>
+
     <AssemblyName>Dali</AssemblyName>
     <RootNamespace>Dali</RootNamespace>
     <PlatformTarget>x64</PlatformTarget>

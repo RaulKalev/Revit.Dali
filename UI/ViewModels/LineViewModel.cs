@@ -2,6 +2,7 @@ using Dali.Models;
 using Dali.Services.Revit;
 using System;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Dali.UI.ViewModels
 {
@@ -10,16 +11,34 @@ namespace Dali.UI.ViewModels
         private readonly LineDefinition _model;
         private readonly Action<LineViewModel> _addToLineAction;
         private readonly Action<LineViewModel> _deleteAction;
+        private readonly Action<LineViewModel> _interactiveAddAction;
+        private readonly Action<LineViewModel> _onNameChanged;
+        private readonly Action<LineViewModel> _changeColorAction;
 
-        public LineViewModel(LineDefinition model, Action<LineViewModel> addToLineAction, Action<LineViewModel> deleteAction)
+        public LineViewModel(LineDefinition model, 
+                             Action<LineViewModel> addToLineAction, 
+                             Action<LineViewModel> deleteAction,
+                             Action<LineViewModel> interactiveAddAction = null,
+                             Action<LineViewModel> onNameChanged = null,
+                             Action<LineViewModel> changeColorAction = null)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _addToLineAction = addToLineAction;
             _deleteAction = deleteAction;
+            _interactiveAddAction = interactiveAddAction;
+            _onNameChanged = onNameChanged;
+            _changeColorAction = changeColorAction;
 
             AddToLineCommand = new RelayCommand(_ => _addToLineAction?.Invoke(this));
             DeleteCommand = new RelayCommand(_ => _deleteAction?.Invoke(this));
+            AddInteractiveCommand = new RelayCommand(_ => _interactiveAddAction?.Invoke(this));
+            ChangeColorCommand = new RelayCommand(_ => _changeColorAction?.Invoke(this));
         }
+
+        public ICommand AddToLineCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand AddInteractiveCommand { get; }
+        public ICommand ChangeColorCommand { get; }
 
         public LineDefinition Model => _model;
 
@@ -32,6 +51,7 @@ namespace Dali.UI.ViewModels
                 {
                     _model.Name = value;
                     OnPropertyChanged();
+                    _onNameChanged?.Invoke(this);
                 }
             }
         }
@@ -45,7 +65,44 @@ namespace Dali.UI.ViewModels
                 {
                     _model.ControllerName = value;
                     OnPropertyChanged();
+                    _onNameChanged?.Invoke(this);
                 }
+            }
+        }
+
+        public string ColorHex
+        {
+            get => _model.ColorHex;
+            set
+            {
+                if (_model.ColorHex != value)
+                {
+                    _model.ColorHex = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ColorBrush));
+                }
+            }
+        }
+
+        public SolidColorBrush ColorBrush
+        {
+            get
+            {
+                try
+                {
+                    if (string.IsNullOrWhiteSpace(ColorHex)) return Brushes.White;
+                    var convertFromString = ColorConverter.ConvertFromString(ColorHex);
+                    if (convertFromString != null)
+                    {
+                        var color = (Color)convertFromString;
+                        return new SolidColorBrush(color);
+                    }
+                }
+                catch
+                {
+                    // Fallback on invalid hex
+                }
+                return Brushes.White;
             }
         }
 
@@ -127,7 +184,13 @@ namespace Dali.UI.ViewModels
             AddressCount = result.TotalAddressCount;
         }
 
-        public ICommand AddToLineCommand { get; }
-        public ICommand DeleteCommand { get; }
+        public void UpdateGaugesDelta(double loadDelta, int addressDelta)
+        {
+            LoadmA += loadDelta;
+            AddressCount += addressDelta;
+        }
+
     }
 }
+
+

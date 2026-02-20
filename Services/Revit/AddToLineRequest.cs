@@ -27,6 +27,7 @@ namespace Dali.Services.Revit
         private readonly int _maxAddressCount;
         private readonly HighlightRegistry _highlightRegistry;
         private readonly Action<AddToLineResult> _callback;
+        private readonly string _colorHex;
 
         /// <summary>Maximum number of detail messages to collect (avoids unbounded output).</summary>
         private const int MaxDetailMessages = 20;
@@ -38,7 +39,8 @@ namespace Dali.Services.Revit
             double maxLoadmA,
             int maxAddressCount,
             HighlightRegistry highlightRegistry,
-            Action<AddToLineResult> callback)
+            Action<AddToLineResult> callback,
+            string colorHex = null)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _activeLineName = activeLineName;
@@ -47,6 +49,7 @@ namespace Dali.Services.Revit
             _maxAddressCount = maxAddressCount;
             _highlightRegistry = highlightRegistry;
             _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            _colorHex = colorHex;
         }
 
         public void Execute(UIApplication app)
@@ -94,6 +97,10 @@ namespace Dali.Services.Revit
                 // --- Phase 1: Filter elements and compute totals (read-only, no transaction) ---
                 var validElements = new List<Element>();
                 var typeCache = new Dictionary<long, CachedTypeData>();
+                string lineIdParamName = _settings.Param_LineId;
+                string controllerParamName = _settings.Param_Controller;
+                string trimmedLineName = _activeLineName.Trim();
+                string trimmedControllerName = _controllerName?.Trim();
 
                 foreach (var eid in selectedIds)
                 {
@@ -165,33 +172,39 @@ namespace Dali.Services.Revit
                         continue;
                     }
 
-#if NET48
-                    long typeIdKey = (long)typeId.IntegerValue;
-#else
-                    long typeIdKey = typeId.Value;
-#endif
-
-                    // Read and cache type parameters (mA Load + Address Count)
-                    if (!typeCache.TryGetValue(typeIdKey, out var cached))
-                    {
-                        cached = ReadTypeData(doc, typeId);
-                        typeCache[typeIdKey] = cached;
-                    }
+                    // Get totals from Instance, fallback to Type
+                    var data = ReadData(doc, element);
 
                     // If type is missing required parameters, BLOCK this element
-                    if (!cached.IsValid)
+                    if (!data.IsValid)
                     {
                         result.SkippedCount++;
-                        if (cached.Warning != null)
+                        if (data.Warning != null)
                         {
-                            AddDetail(result, cached.Warning);
+                            AddDetail(result, data.Warning);
                         }
                         continue;
                     }
 
+                    // --- Deduplication Check ---
+                    // If the element is already assigned to this exact line and controller, skip it so we don't double-count
+                    Parameter lineIdParam = element.LookupParameter(lineIdParamName);
+                    Parameter controllerParam = element.LookupParameter(controllerParamName);
+                    
+                    string elemLineName = lineIdParam?.StorageType == StorageType.String ? lineIdParam.AsString() : lineIdParam?.AsValueString();
+                    string elemCtrlName = controllerParam?.StorageType == StorageType.String ? controllerParam.AsString() : controllerParam?.AsValueString();
+
+                    // Compare names (consider nulls)
+                    if (elemLineName == trimmedLineName && 
+                        (string.IsNullOrWhiteSpace(trimmedControllerName) || elemCtrlName == trimmedControllerName))
+                    {
+                        result.SkippedCount++;
+                        continue;
+                    }
+
                     // Accumulate totals from valid elements
-                    result.TotalLoadmA += cached.LoadmA;
-                    result.TotalAddressCount += cached.AddressCount;
+                    result.TotalLoadmA += data.LoadmA;
+                    result.TotalAddressCount += data.AddressCount;
                     validElements.Add(element);
                 }
 
@@ -221,8 +234,7 @@ namespace Dali.Services.Revit
                 }
 
                 // --- Phase 3: Write DALI_Line_ID and DALI_Controller to instance elements ---
-                string lineIdParamName = _settings.Param_LineId;
-                string controllerParamName = _settings.Param_Controller;
+                // Use variables previously declared in Phase 1
 
                 if (string.IsNullOrWhiteSpace(lineIdParamName))
                 {
@@ -230,9 +242,6 @@ namespace Dali.Services.Revit
                     DispatchResult(result);
                     return;
                 }
-
-                string trimmedLineName = _activeLineName.Trim();
-                string trimmedControllerName = _controllerName?.Trim();
 
                 using (var trans = new Transaction(doc, "DALI: Add to Line"))
                 {
@@ -250,33 +259,15 @@ namespace Dali.Services.Revit
                                 AddDetail(result, $"Element '{element.Name}' (ID {element.Id}): missing instance parameter '{lineIdParamName}'.");
                                 continue;
                             }
-
                             if (lineParam.IsReadOnly)
                             {
                                 result.FailedCount++;
-                                AddDetail(result, $"Element '{element.Name}' (ID {element.Id}): parameter '{lineIdParamName}' is read-only.");
+                                AddDetail(result, $"Element '{element.Name}' (ID {element.Id}): '{lineIdParamName}' is read-only.");
                                 continue;
                             }
+                            lineParam.Set(trimmedLineName);
 
-                            // Check for previous value (for reassignment tracking)
-                            string previousValue = lineParam.StorageType == StorageType.String
-                                ? lineParam.AsString()
-                                : lineParam.AsValueString();
-
-                            if (!string.IsNullOrWhiteSpace(previousValue) && previousValue != trimmedLineName)
-                            {
-                                result.ReassignedCount++;
-                            }
-
-                            bool written = lineParam.Set(trimmedLineName);
-                            if (!written)
-                            {
-                                result.FailedCount++;
-                                AddDetail(result, $"Element '{element.Name}' (ID {element.Id}): Set() returned false for '{lineIdParamName}'.");
-                                continue;
-                            }
-
-                            // 2. Write Controller (Optional)
+                            // 2. Write Controller Name (if configured/available)
                             if (!string.IsNullOrWhiteSpace(controllerParamName) && !string.IsNullOrWhiteSpace(trimmedControllerName))
                             {
                                 Parameter ctrlParam = element.LookupParameter(controllerParamName);
@@ -284,8 +275,6 @@ namespace Dali.Services.Revit
                                 {
                                     ctrlParam.Set(trimmedControllerName);
                                 }
-                                // We don't fail the entire operation if Controller param is missing, just skip it.
-                                // But maybe we should log a warning?
                             }
 
                             result.UpdatedCount++;
@@ -293,25 +282,40 @@ namespace Dali.Services.Revit
                         catch (Exception ex)
                         {
                             result.FailedCount++;
-                            AddDetail(result, $"Element '{element.Name}' (ID {element.Id}): {ex.Message}");
+                            AddDetail(result, $"Error writing to '{element.Name}' (ID {element.Id}): {ex.Message}");
                         }
                     }
 
-                    trans.Commit();
+                    if (result.UpdatedCount > 0)
+                    {
+                        trans.Commit();
+                        result.Success = true;
+                    }
+                    else
+                    {
+                        trans.RollBack();
+                        result.Success = false;
+                    }
                 }
 
-                // Build summary message
-                result.Success = true;
-                result.Message = $"Assigned '{trimmedLineName}' to {result.UpdatedCount} element(s).";
-                log?.Info($"AddToLine: wrote '{trimmedLineName}' to {result.UpdatedCount} element(s). Failed: {result.FailedCount}, Reassigned: {result.ReassignedCount}.");
-                if (result.ReassignedCount > 0)
-                    result.Message += $" ({result.ReassignedCount} reassigned from another line.)";
-                if (result.FailedCount > 0)
-                    result.Message += $" {result.FailedCount} failed.";
-                if (result.SkippedCount > 0)
-                    result.Message += $" {result.SkippedCount} skipped.";
+                // --- Phase 4: Summarize ---
+                if (result.Success)
+                {
+                    result.Message = $"Added {result.UpdatedCount} element(s) to '{trimmedLineName}'.";
+                    if (result.FailedCount > 0)
+                        result.Message += $" Failed: {result.FailedCount}.";
+                    if (result.SkippedCount > 0)
+                        result.Message += $" Skipped: {result.SkippedCount}.";
 
-                // --- Phase 4: Apply view filter highlight (non-blocking) ---
+                    log?.Info($"AddToLine: success. Added {result.UpdatedCount}, Failed {result.FailedCount}, Skipped {result.SkippedCount}.");
+                }
+                else
+                {
+                    result.Message = $"Failed to assign elements to '{trimmedLineName}'. See details.";
+                    log?.Warning("AddToLine: failed.");
+                }
+
+                // --- Phase 5: Apply view filter highlight (non-blocking) ---
                 // Runs in a separate transaction after the write commits.
                 // Highlight failures do NOT roll back the parameter writes.
                 try
@@ -324,7 +328,14 @@ namespace Dali.Services.Revit
                         {
                             highlightTrans.Start();
                             var hlResult = highlighter.ApplyLineHighlight(
-                                doc, view, _settings, trimmedLineName, _highlightRegistry);
+                                doc, view, _settings, trimmedControllerName, trimmedLineName, _highlightRegistry, _colorHex);
+                            
+                            if (hlResult.Success && hlResult.ElementsOnLine != null)
+                            {
+                                app.ActiveUIDocument?.Selection.SetElementIds(hlResult.ElementsOnLine);
+                                app.ActiveUIDocument?.RefreshActiveView();
+                            }
+
                             highlightTrans.Commit();
 
                             if (hlResult.Success)
@@ -354,52 +365,68 @@ namespace Dali.Services.Revit
         }
 
         /// <summary>
-        /// Reads type-level DALI parameters (mA Load, Address Count) for limit validation.
-        /// Uses the same logic as SelectionTotalsService but inline to avoid allocation overhead.
+        /// Reads DALI parameters (mA Load, Address Count) from Instance, falling back to Type.
         /// </summary>
-        private CachedTypeData ReadTypeData(Document doc, ElementId typeId)
+        private CachedTypeData ReadData(Document doc, Element instanceElement)
         {
             var data = new CachedTypeData();
-
-            Element typeElement = doc.GetElement(typeId);
-            if (typeElement == null || !(typeElement is FamilySymbol symbol))
-            {
-                data.Warning = $"Type ID {typeId} is not a FamilySymbol.";
-                return data;
-            }
-
-            string typeName = $"{symbol.FamilyName} : {symbol.Name}";
             bool hasLoad = false;
             bool hasAddr = false;
 
-            // Read mA Load
+            // Read load
             if (!string.IsNullOrWhiteSpace(_settings.Param_Load))
             {
-                Parameter loadParam = symbol.LookupParameter(_settings.Param_Load);
-                if (loadParam != null)
+                Parameter pInstance = instanceElement.LookupParameter(_settings.Param_Load);
+                if (pInstance != null && pInstance.HasValue) 
                 {
                     hasLoad = true;
-                    data.LoadmA = SafeReadDouble(loadParam);
+                    data.LoadmA = SafeReadDouble(pInstance);
                 }
                 else
                 {
-                    data.Warning = $"Type '{typeName}': missing '{_settings.Param_Load}'.";
+                    Element typeElement = doc.GetElement(instanceElement.GetTypeId());
+                    if (typeElement is FamilySymbol symbol)
+                    {
+                        Parameter pType = symbol.LookupParameter(_settings.Param_Load);
+                        if (pType != null)
+                        {
+                            hasLoad = true;
+                            data.LoadmA = SafeReadDouble(pType);
+                        }
+                        else
+                        {
+                            data.Warning = $"Missing '{_settings.Param_Load}' parameter.";
+                        }
+                    }
                 }
             }
 
             // Read Address Count
             if (!string.IsNullOrWhiteSpace(_settings.Param_AddressCount))
             {
-                Parameter addrParam = symbol.LookupParameter(_settings.Param_AddressCount);
-                if (addrParam != null)
+                Parameter pInstance = instanceElement.LookupParameter(_settings.Param_AddressCount);
+                if (pInstance != null && pInstance.HasValue)
                 {
                     hasAddr = true;
-                    data.AddressCount = SafeReadInt(addrParam);
+                    data.AddressCount = SafeReadInt(pInstance);
                 }
                 else
                 {
-                    string msg = $"Type '{typeName}': missing '{_settings.Param_AddressCount}'.";
-                    data.Warning = data.Warning != null ? data.Warning + " | " + msg : msg;
+                    Element typeElement = doc.GetElement(instanceElement.GetTypeId());
+                    if (typeElement is FamilySymbol symbol)
+                    {
+                        Parameter pType = symbol.LookupParameter(_settings.Param_AddressCount);
+                        if (pType != null)
+                        {
+                            hasAddr = true;
+                            data.AddressCount = SafeReadInt(pType);
+                        }
+                        else
+                        {
+                            string msg = $"Missing '{_settings.Param_AddressCount}' parameter.";
+                            data.Warning = data.Warning != null ? data.Warning + " | " + msg : msg;
+                        }
+                    }
                 }
             }
 
@@ -456,15 +483,7 @@ namespace Dali.Services.Revit
         /// <summary>Marshals the result back to the WPF UI thread.</summary>
         private void DispatchResult(AddToLineResult result)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                dispatcher.Invoke(() => _callback(result));
-            }
-            else
-            {
-                _callback(result);
-            }
+            _callback(result);
         }
 
         /// <summary>Internal cache for type-level DALI parameter values.</summary>
@@ -477,3 +496,5 @@ namespace Dali.Services.Revit
         }
     }
 }
+
+

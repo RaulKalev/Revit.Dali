@@ -73,15 +73,9 @@ namespace Dali.Services.Revit
         /// </summary>
         private void DispatchResult(SelectionTotalsResult result)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                dispatcher.Invoke(() => _callback(result));
-            }
-            else
-            {
-                _callback(result);
-            }
+            _callback(result);
         }
     }
 }
+
+

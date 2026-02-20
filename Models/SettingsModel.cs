@@ -6,7 +6,7 @@ namespace Dali.Models
     public class SettingsModel
     {
         // 0. Settings Version for Migration
-        public int Version { get; set; } = 3;
+        public int Version { get; set; } = 4;
 
         // 1. Included Categories
         public List<BuiltInCategory> IncludedCategories { get; set; } = new List<BuiltInCategory>
@@ -33,5 +33,8 @@ namespace Dali.Models
 
         // NEW: Hierarchical structure
         public List<ControllerDefinition> SavedControllers { get; set; } = new List<ControllerDefinition>();
+
+        // NEW: Top-level Panels
+        public List<PanelDefinition> SavedPanels { get; set; } = new List<PanelDefinition>();
     }
 }

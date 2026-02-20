@@ -89,13 +89,25 @@ namespace Dali.UI
             _isDataLoaded = true;
             TryShowWindow();
 
-            // Check for updates after window loads
-            Loaded += (s, e) => 
+            // Check for updates after window loads and initial Revit scans finish
+            Loaded += async (s, e) => 
             {
-                Dispatcher.BeginInvoke(new Action(() => 
+                try
                 {
+                    // Wait for the window to settle
+                    await System.Threading.Tasks.Task.Delay(2000);
+                    
+                    // Wait until the GroupingViewModel has finished its initial Revit scan
+                    while (GroupingVM != null && GroupingVM.IsBusy)
+                    {
+                        await System.Threading.Tasks.Task.Delay(500);
+                    }
+
+                    // Safe to call directly — we're on the UI thread and Revit's
+                    // ExternalEvent has finished by now.
                     Services.UpdateLogService.CheckAndShow(this);
-                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                }
+                catch { /* Silently ignore update check failures */ }
             };
         }
 
@@ -183,10 +195,9 @@ namespace Dali.UI
                 return;
             }
 
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Opacity = 1;
-            }), DispatcherPriority.Render);
+            // Window is now created outside of Revit's suspended Dispatcher context,
+            // so direct property assignment is safe.
+            Opacity = 1;
         }
 
         #endregion

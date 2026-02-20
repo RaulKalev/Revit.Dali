@@ -89,15 +89,9 @@ namespace Dali.Services.Revit
         /// <summary>Marshals the result back to the WPF UI thread.</summary>
         private void DispatchResult(ResetResult result)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                dispatcher.Invoke(() => _callback(result));
-            }
-            else
-            {
-                _callback(result);
-            }
+            _callback(result);
         }
     }
 }
+
+
