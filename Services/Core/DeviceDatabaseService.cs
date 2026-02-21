@@ -8,8 +8,8 @@ namespace Dali.Services.Core
 {
     public class DeviceDatabaseService
     {
-        private static readonly string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RKTools", "DALIManager");
-        private static readonly string DbFilePath = Path.Combine(AppDataFolder, "devices.json");
+        private static readonly string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EULE Dropbox", "0_EULE  Team folder (kogu kollektiiv)", "02_EULE REVIT TEMPLATE");
+        private static readonly string DbFilePath = Path.Combine(AppDataFolder, "DaliElemendid.json");
 
         private readonly ILogger _logger;
         private DeviceDatabase _database;
@@ -35,17 +35,17 @@ namespace Dali.Services.Core
 
                 if (!File.Exists(DbFilePath))
                 {
-                    _logger.Info($"devices.json not found at {DbFilePath}. Creating default...");
+                    _logger.Info($"DaliElemendid.json not found at {DbFilePath}. Creating default...");
                     CreateDefaultDatabase();
                 }
 
                 string json = File.ReadAllText(DbFilePath);
                 _database = JsonConvert.DeserializeObject<DeviceDatabase>(json);
-                _logger.Info($"Successfully loaded devices.json with {_database?.Devices?.Count ?? 0} devices.");
+                _logger.Info($"Successfully loaded DaliElemendid.json with {_database?.Devices?.Count ?? 0} devices.");
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load devices.json: {ex.Message}");
+                _logger.Error($"Failed to load DaliElemendid.json: {ex.Message}");
                 // Fallback to empty to prevent null refs
                 if (_database == null)
                 {
@@ -194,12 +194,12 @@ namespace Dali.Services.Core
 
                 string json = JsonConvert.SerializeObject(_database, Formatting.Indented);
                 File.WriteAllText(DbFilePath, json);
-                _logger.Info($"Successfully saved devices.json");
+                _logger.Info($"Successfully saved DaliElemendid.json");
                 DatabaseChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to save devices.json: {ex.Message}");
+                _logger.Error($"Failed to save DaliElemendid.json: {ex.Message}");
                 throw;
             }
         }
