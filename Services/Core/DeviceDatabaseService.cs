@@ -22,6 +22,8 @@ namespace Dali.Services.Core
 
         public DeviceDatabase Database => _database;
 
+        public event EventHandler DatabaseChanged;
+
         private void LoadDatabase()
         {
             try
@@ -193,6 +195,7 @@ namespace Dali.Services.Core
                 string json = JsonConvert.SerializeObject(_database, Formatting.Indented);
                 File.WriteAllText(DbFilePath, json);
                 _logger.Info($"Successfully saved devices.json");
+                DatabaseChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -215,14 +218,14 @@ namespace Dali.Services.Core
             SaveDatabase();
         }
 
-        public void UpdateDevice(DeviceDto modifiedDevice)
+        public void UpdateDevice(string originalId, DeviceDto modifiedDevice)
         {
             if (_database?.Devices == null) return;
 
-            var existing = _database.Devices.FirstOrDefault(d => d.Id == modifiedDevice.Id);
+            var existing = _database.Devices.FirstOrDefault(d => d.Id == originalId);
             if (existing != null)
             {
-                // Note: Not modifying ID
+                existing.Id = modifiedDevice.Id;
                 existing.Type = modifiedDevice.Type;
                 existing.Model = modifiedDevice.Model;
                 existing.Name = modifiedDevice.Name;

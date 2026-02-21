@@ -42,9 +42,24 @@ namespace Dali.UI.ViewModels
 
             // Subscribe to settings changes
             _settingsService.OnSettingsSaved += OnSettingsSaved;
+            _deviceDatabaseService.DatabaseChanged += OnDatabaseChanged;
 
             LoadPanels();
             ScanModelOnStartup();
+        }
+
+        // ---- Event Handlers ----
+
+        private void OnDatabaseChanged(object sender, EventArgs e)
+        {
+            var controllers = _deviceDatabaseService.GetControllers().ToList();
+            foreach (var panel in Panels)
+            {
+                foreach (var ctrl in panel.Controllers)
+                {
+                    ctrl.UpdateAvailableDevices(controllers);
+                }
+            }
         }
 
         // ---- Panel/Controller hierarchy ----

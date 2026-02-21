@@ -85,7 +85,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Database ID" Foreground="Gray" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.Id}" IsReadOnly="True" Style="{DynamicResource CustomTextBoxStyle}" Foreground="DarkGray" Background="#111"/>
+                                <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.Id, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
                             </Grid>
 
                             <!-- General Info -->

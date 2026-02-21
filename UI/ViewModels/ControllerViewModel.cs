@@ -129,6 +129,20 @@ namespace Dali.UI.ViewModels
             }
         }
 
+        public void UpdateAvailableDevices(IEnumerable<DeviceDto> devices)
+        {
+            string currentId = SelectedDevice?.Id;
+            AvailableDevices.Clear();
+            foreach (var d in devices) AvailableDevices.Add(d);
+            
+            if (currentId != null)
+            {
+                _selectedDevice = AvailableDevices.FirstOrDefault(d => d.Id == currentId);
+                OnPropertyChanged(nameof(SelectedDevice));
+            }
+            RecalcTotals();
+        }
+
         public bool CanAddLine => _selectedDevice == null || !_selectedDevice.DaliLines.HasValue || Lines.Count < _selectedDevice.DaliLines.Value;
 
         // ---- Controller Name ----

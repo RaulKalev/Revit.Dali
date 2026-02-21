@@ -134,7 +134,7 @@ namespace Dali.UI.ViewModels
         {
             if (ActiveEditDevice == null || string.IsNullOrWhiteSpace(ActiveEditDevice.Id)) return;
 
-            _databaseService.UpdateDevice(ActiveEditDevice);
+            _databaseService.UpdateDevice(SelectedDevice.Id, ActiveEditDevice);
             HasChanges = false;
             
             // Reload grid and retain selection
