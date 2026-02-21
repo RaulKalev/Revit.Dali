@@ -26,12 +26,12 @@ namespace Dali.UI.ViewModels
         // Track which line triggered the current Add operation so we can update its gauge
         private LineViewModel _pendingLine;
 
-        public GroupingViewModel(SettingsService settingsService, RevitExternalEventService eventService)
+        public GroupingViewModel(SettingsService settingsService, RevitExternalEventService eventService, DeviceDatabaseService deviceDatabaseService)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
             _highlightRegistry = new HighlightRegistry();
-            _deviceDatabaseService = new DeviceDatabaseService(new SessionLogger());
+            _deviceDatabaseService = deviceDatabaseService ?? throw new ArgumentNullException(nameof(deviceDatabaseService));
 
             Warnings = new ObservableCollection<string>();
             Panels = new ObservableCollection<PanelViewModel>();

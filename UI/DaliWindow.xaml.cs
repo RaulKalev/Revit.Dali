@@ -37,6 +37,7 @@ namespace Dali.UI
         private readonly Services.Revit.RevitExternalEventService _externalEventService;
         private readonly Services.SettingsService _settingsService;
         private readonly Services.ParameterResolver _parameterResolver;
+        private readonly Services.Core.DeviceDatabaseService _deviceDatabaseService;
 
         public ViewModels.SettingsViewModel SettingsVM { get; private set; }
         public ViewModels.BatchSetupViewModel BatchSetupVM { get; private set; }
@@ -51,6 +52,7 @@ namespace Dali.UI
             _settingsService = settingsService;
             _parameterResolver = parameterResolver;
             _uiApplication = app;
+            _deviceDatabaseService = new Services.Core.DeviceDatabaseService(new Services.Core.SessionLogger());
             
             InitializeComponent();
             
@@ -62,11 +64,11 @@ namespace Dali.UI
             BatchSetupViewControl.DataContext = BatchSetupVM;
 
             // Wire up Grouping ViewModel
-            GroupingVM = new ViewModels.GroupingViewModel(_settingsService, _externalEventService);
+            GroupingVM = new ViewModels.GroupingViewModel(_settingsService, _externalEventService, _deviceDatabaseService);
             GroupingViewControl.DataContext = GroupingVM;
 
             // Wire up Device Manager ViewModel
-            DeviceManagerVM = new ViewModels.DeviceManagerViewModel(new Services.Core.DeviceDatabaseService(new Services.Core.SessionLogger()));
+            DeviceManagerVM = new ViewModels.DeviceManagerViewModel(_deviceDatabaseService);
             DeviceManagerViewControl.DataContext = DeviceManagerVM;
 
             DataContext = this;
