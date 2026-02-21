@@ -138,14 +138,17 @@ namespace Dali.UI.ViewModels
                 line => OnChangeLineColor(line),
                 (ctrl, oldD) => OnControllerDeviceChanged(ctrl, oldD));
             
-            vm.MaxLoadmA = _controllerMaxLoadmA;
-            vm.MaxAddressCount = _controllerMaxAddressCount;
-            
-            // Also set limits on any existing lines
-            foreach (var line in vm.Lines)
+            if (vm.SelectedDevice == null)
             {
-                line.MaxLoadmA = _lineMaxLoadmA;
-                line.MaxAddressCount = _lineMaxAddressCount;
+                vm.MaxLoadmA = _controllerMaxLoadmA;
+                vm.MaxAddressCount = _controllerMaxAddressCount;
+                
+                // Also set limits on any existing lines
+                foreach (var line in vm.Lines)
+                {
+                    line.MaxLoadmA = _lineMaxLoadmA;
+                    line.MaxAddressCount = _lineMaxAddressCount;
+                }
             }
 
             return vm;
@@ -368,12 +371,15 @@ namespace Dali.UI.ViewModels
             {
                 foreach (var c in p.Controllers)
                 {
-                    c.MaxLoadmA = _controllerMaxLoadmA;
-                    c.MaxAddressCount = _controllerMaxAddressCount;
-                    foreach (var line in c.Lines)
+                    if (c.SelectedDevice == null)
                     {
-                        line.MaxLoadmA = _lineMaxLoadmA;
-                        line.MaxAddressCount = _lineMaxAddressCount;
+                        c.MaxLoadmA = _controllerMaxLoadmA;
+                        c.MaxAddressCount = _controllerMaxAddressCount;
+                        foreach (var line in c.Lines)
+                        {
+                            line.MaxLoadmA = _lineMaxLoadmA;
+                            line.MaxAddressCount = _lineMaxAddressCount;
+                        }
                     }
                 }
             }

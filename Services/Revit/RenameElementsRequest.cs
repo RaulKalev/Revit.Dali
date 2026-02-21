@@ -76,6 +76,9 @@ namespace Dali.Services.Revit
                 }
 
                 var doc = uidoc.Document;
+                
+                // Capture active selection so it's not lost when properties are updated
+                var activeSelection = uidoc.Selection.GetElementIds();
 
                 var includedCategoryIds = new HashSet<int>();
                 foreach (var bic in _settings.IncludedCategories)
@@ -185,6 +188,10 @@ namespace Dali.Services.Revit
                         result.Success = false;
                         result.Message = $"Failed to rename any of the {elementsToRename.Count} matched elements.";
                     }
+                }
+                if (activeSelection != null && activeSelection.Count > 0)
+                {
+                    try { uidoc.Selection.SetElementIds(activeSelection); } catch { }
                 }
             }
             catch (Exception ex)

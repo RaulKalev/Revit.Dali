@@ -109,12 +109,12 @@ namespace Dali.UI.ViewModels
                     {
                         if (value.RatedCurrentmAPerLine.HasValue)
                         {
-                            MaxLoadmA = value.RatedCurrentmAPerLine.Value;
+                            MaxLoadmA = value.RatedCurrentmAPerLine.Value * (value.DaliLines ?? 1);
                             foreach(var line in Lines) line.MaxLoadmA = value.RatedCurrentmAPerLine.Value;
                         }
                         if (value.MaxAddressesPerLine.HasValue)
                         {
-                            MaxAddressCount = value.MaxAddressesPerLine.Value;
+                            MaxAddressCount = value.MaxAddressesPerLine.Value * (value.DaliLines ?? 1);
                             foreach(var line in Lines) line.MaxAddressCount = value.MaxAddressesPerLine.Value;
                         }
                     }
