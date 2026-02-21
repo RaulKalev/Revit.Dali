@@ -360,5 +360,10 @@ namespace Dali.UI
         }
 
         #endregion
+
+        private void GroupingViewControl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

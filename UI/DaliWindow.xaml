@@ -186,7 +186,7 @@
                     
                     <!-- Tab 1: Grouping -->
                     <TabItem x:Name="GroupingTab" Header="Grouping">
-                        <ui:GroupingView x:Name="GroupingViewControl" Margin="0,5,0,0"/>
+                        <ui:GroupingView x:Name="GroupingViewControl" Margin="0,5,0,0" Loaded="GroupingViewControl_Loaded"/>
                     </TabItem>
                     <!-- Tab 2: Batch Setup -->
                     <TabItem x:Name="BatchSetupTab" Header="Batch Setup">

@@ -1,205 +1,264 @@
-<UserControl x:Class="Dali.UI.GroupingView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:ui="clr-namespace:Dali.UI"
-             xmlns:controls="clr-namespace:Dali.UI.Controls"
-             xmlns:vm="clr-namespace:Dali.UI.ViewModels"
-             mc:Ignorable="d"
-             d:DesignHeight="750" d:DesignWidth="900"
-             Background="{DynamicResource PrimaryBackgroundBrush}">
+<UserControl
+    x:Class="Dali.UI.GroupingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Dali.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="clr-namespace:Dali.UI"
+    xmlns:vm="clr-namespace:Dali.UI.ViewModels"
+    d:DesignHeight="750"
+    d:DesignWidth="900"
+    Background="{DynamicResource PrimaryBackgroundBrush}"
+    mc:Ignorable="d">
 
     <UserControl.Resources>
-        <ui:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <ui:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
-        <Style x:Key="InlineEditTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Padding" Value="4,2"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Style
+            x:Key="InlineEditTextBoxStyle"
+            BasedOn="{StaticResource {x:Type TextBox}}"
+            TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1AFFFFFF"/>
-                    <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+                    <Setter Property="Background" Value="#1AFFFFFF" />
+                    <Setter Property="BorderBrush" Value="#33FFFFFF" />
                 </Trigger>
                 <Trigger Property="IsKeyboardFocused" Value="True">
-                    <Setter Property="Background" Value="#33FFFFFF"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                    <Setter Property="Background" Value="#33FFFFFF" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Bar fill styles -->
+        <!--  Bar fill styles  -->
         <Style x:Key="GreenBarFill" TargetType="Border">
-            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Background" Value="#4CAF50" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsWarningLoad}" Value="True">
-                    <Setter Property="Background" Value="#FFC107"/>
+                    <Setter Property="Background" Value="#FFC107" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsOverLoad}" Value="True">
-                    <Setter Property="Background" Value="#F44336"/>
+                    <Setter Property="Background" Value="#F44336" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style x:Key="GreenBarFillCtrl" TargetType="Border">
-            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Background" Value="#4CAF50" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsWarningLoad}" Value="True">
-                    <Setter Property="Background" Value="#FFC107"/>
+                    <Setter Property="Background" Value="#FFC107" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsOverLoad}" Value="True">
-                    <Setter Property="Background" Value="#F44336"/>
+                    <Setter Property="Background" Value="#F44336" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <!-- ==================== LINE CARD TEMPLATE ==================== -->
+        <!--  ==================== LINE CARD TEMPLATE ====================  -->
         <DataTemplate DataType="{x:Type vm:LineViewModel}">
-            <Border Background="{DynamicResource PrimaryBackgroundBrush}"
-                    CornerRadius="4" Margin="0,0,0,6"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                <Expander IsExpanded="{Binding IsExpanded}" Background="Transparent" HorizontalContentAlignment="Stretch">
+            <Border
+                Margin="0,0,0,6"
+                Background="{DynamicResource PrimaryBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+                <Expander
+                    HorizontalContentAlignment="Stretch"
+                    Background="Transparent"
+                    IsExpanded="{Binding IsExpanded}">
                     <Expander.Header>
-                        <Grid Margin="4,0" Background="Transparent" HorizontalAlignment="Stretch" MouseLeftButtonDown="Header_MouseLeftButtonDown" Loaded="HeaderGrid_Loaded">
+                        <Grid
+                            Margin="4,0"
+                            HorizontalAlignment="Stretch"
+                            Background="Transparent"
+                            Loaded="HeaderGrid_Loaded"
+                            MouseLeftButtonDown="Header_MouseLeftButtonDown">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            
-                            <!-- Icon & Title -->
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <materialDesign:PackIcon Kind="VectorLine" Width="16" Height="16"
-                                                         Foreground="{DynamicResource IconBrush}"
-                                                         VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="13"
-                                         Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Center"
-                                         Style="{StaticResource InlineEditTextBoxStyle}" MinWidth="100"/>
+
+                            <!--  Icon & Title  -->
+                            <StackPanel
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,8,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource IconBrush}"
+                                    Kind="VectorLine" />
+                                <TextBox
+                                    MinWidth="100"
+                                    VerticalAlignment="Center"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource ForegroundBrush}"
+                                    Style="{StaticResource InlineEditTextBoxStyle}"
+                                    Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
-                            
-                            <!-- Mini gauges in header when collapsed -->
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                                <Border Background="#1A4CAF50" CornerRadius="3" Margin="0,0,4,0" Padding="6,2">
-                                    <TextBlock Foreground="#4CAF50" FontSize="10">
-                                        <Run Text="{Binding LoadmA, StringFormat='{}{0:N0}'}"/>
-                                        <Run Text="mA"/>
+
+                            <!--  Mini gauges in header when collapsed  -->
+                            <StackPanel
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                                <Border
+                                    Margin="0,0,4,0"
+                                    Padding="6,2"
+                                    Background="#1A4CAF50"
+                                    CornerRadius="3">
+                                    <TextBlock FontSize="10" Foreground="#4CAF50">
+                                        <Run Text="{Binding LoadmA, StringFormat='{}{0:N0}'}" />
+                                        <Run Text="mA" />
                                     </TextBlock>
                                 </Border>
-                                <Border Background="#1A448AFF" CornerRadius="3" Padding="6,2">
-                                    <TextBlock Foreground="#64B5F6" FontSize="10">
-                                        <Run Text="{Binding AddressCount}"/>
-                                        <Run Text="addr"/>
+                                <Border
+                                    Padding="6,2"
+                                    Background="#1A448AFF"
+                                    CornerRadius="3">
+                                    <TextBlock FontSize="10" Foreground="#64B5F6">
+                                        <Run Text="{Binding AddressCount}" />
+                                        <Run Text="addr" />
                                     </TextBlock>
                                 </Border>
                             </StackPanel>
 
-                            <Button Grid.Column="2" Command="{Binding DeleteCommand}"
-                                    Style="{DynamicResource CustomActionButtonStyle}"
-                                    Background="Transparent" BorderThickness="0"
-                                    Foreground="#FFFFFF"
-                                    Height="28" Width="28" Padding="0" ToolTip="Delete Line">
-                                <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
+                            <Button
+                                Grid.Column="2"
+                                Width="28"
+                                Height="28"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding DeleteCommand}"
+                                Foreground="#FFFFFF"
+                                Style="{DynamicResource CustomActionButtonStyle}"
+                                ToolTip="Delete Line">
+                                <materialDesign:PackIcon
+                                    Width="16"
+                                    Height="16"
+                                    Kind="Delete" />
                             </Button>
                         </Grid>
                     </Expander.Header>
 
                     <StackPanel Margin="12,0,12,12">
-                        <Separator Background="{DynamicResource BorderBrush}" Margin="0,0,0,10"/>
+                        <Separator Margin="0,0,0,10" Background="{DynamicResource BorderBrush}" />
 
-                        <!-- Inputs moved to actions row -->
+                        <!--  Inputs moved to actions row  -->
 
-                        <!-- Per-line gauges -->
+                        <!--  Per-line gauges  -->
                         <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Load -->
+                            <!--  Load  -->
                             <StackPanel Grid.Column="0">
                                 <Grid Margin="0,0,0,3">
-                                    <TextBlock Text="Load" Foreground="Gray" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock FontSize="11" HorizontalAlignment="Right">
+                                    <TextBlock
+                                        HorizontalAlignment="Left"
+                                        FontSize="11"
+                                        Foreground="Gray"
+                                        Text="Load" />
+                                    <TextBlock HorizontalAlignment="Right" FontSize="11">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="Gray"/>
+                                                <Setter Property="Foreground" Value="Gray" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsWarningLoad}" Value="True">
-                                                        <Setter Property="Foreground" Value="#FFC107"/>
+                                                        <Setter Property="Foreground" Value="#FFC107" />
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsOverLoad}" Value="True">
-                                                        <Setter Property="Foreground" Value="#F44336"/>
+                                                        <Setter Property="Foreground" Value="#F44336" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
-                                        <Run Text="{Binding LoadmA, StringFormat='{}{0:N0}'}"/>
-                                        <Run Text=" / "/>
-                                        <Run Text="{Binding MaxLoadmA, StringFormat='{}{0:N0}'}"/>
-                                        <Run Text=" mA"/>
+                                        <Run Text="{Binding LoadmA, StringFormat='{}{0:N0}'}" />
+                                        <Run Text=" / " />
+                                        <Run Text="{Binding MaxLoadmA, StringFormat='{}{0:N0}'}" />
+                                        <Run Text=" mA" />
                                     </TextBlock>
                                 </Grid>
                                 <Grid Height="5">
-                                    <Border Background="#333333" CornerRadius="3"/>
-                                    <Border CornerRadius="3" HorizontalAlignment="Left" Style="{StaticResource GreenBarFill}">
+                                    <Border Background="#333333" CornerRadius="3" />
+                                    <Border
+                                        HorizontalAlignment="Left"
+                                        CornerRadius="3"
+                                        Style="{StaticResource GreenBarFill}">
                                         <Border.Width>
                                             <MultiBinding Converter="{x:Static ui:RatioToWidthConverter.Instance}">
-                                                <Binding Path="LoadRatio"/>
-                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                <Binding Path="LoadRatio" />
+                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                                             </MultiBinding>
                                         </Border.Width>
                                     </Border>
                                 </Grid>
                             </StackPanel>
 
-                            <!-- Address -->
+                            <!--  Address  -->
                             <StackPanel Grid.Column="2">
                                 <Grid Margin="0,0,0,3">
-                                    <TextBlock Text="Addresses" Foreground="Gray" FontSize="11" HorizontalAlignment="Left"/>
-                                    <TextBlock FontSize="11" HorizontalAlignment="Right">
+                                    <TextBlock
+                                        HorizontalAlignment="Left"
+                                        FontSize="11"
+                                        Foreground="Gray"
+                                        Text="Addresses" />
+                                    <TextBlock HorizontalAlignment="Right" FontSize="11">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="Gray"/>
+                                                <Setter Property="Foreground" Value="Gray" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsWarningAddress}" Value="True">
-                                                        <Setter Property="Foreground" Value="#FFC107"/>
+                                                        <Setter Property="Foreground" Value="#FFC107" />
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsOverAddress}" Value="True">
-                                                        <Setter Property="Foreground" Value="#F44336"/>
+                                                        <Setter Property="Foreground" Value="#F44336" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
-                                        <Run Text="{Binding AddressCount}"/>
-                                        <Run Text=" / "/>
-                                        <Run Text="{Binding MaxAddressCount}"/>
+                                        <Run Text="{Binding AddressCount}" />
+                                        <Run Text=" / " />
+                                        <Run Text="{Binding MaxAddressCount}" />
                                     </TextBlock>
                                 </Grid>
                                 <Grid Height="5">
-                                    <Border Background="#333333" CornerRadius="3"/>
-                                    <Border CornerRadius="3" HorizontalAlignment="Left">
+                                    <Border Background="#333333" CornerRadius="3" />
+                                    <Border HorizontalAlignment="Left" CornerRadius="3">
                                         <Border.Style>
                                             <Style TargetType="Border">
-                                                <Setter Property="Background" Value="#4CAF50"/>
+                                                <Setter Property="Background" Value="#4CAF50" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsWarningAddress}" Value="True">
-                                                        <Setter Property="Background" Value="#FFC107"/>
+                                                        <Setter Property="Background" Value="#FFC107" />
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsOverAddress}" Value="True">
-                                                        <Setter Property="Background" Value="#F44336"/>
+                                                        <Setter Property="Background" Value="#F44336" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
                                         <Border.Width>
                                             <MultiBinding Converter="{x:Static ui:RatioToWidthConverter.Instance}">
-                                                <Binding Path="AddressRatio"/>
-                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                <Binding Path="AddressRatio" />
+                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                                             </MultiBinding>
                                         </Border.Width>
                                     </Border>
@@ -207,47 +266,79 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Action buttons and Inputs -->
+                        <!--  Action buttons and Inputs  -->
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            
-                            <!-- Action buttons -->
+
+                            <!--  Action buttons  -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                <Button Command="{Binding AddToLineCommand}"
-                                        Style="{DynamicResource CustomActionButtonStyle}"
-                                        Height="28" FontSize="12" Padding="10,0" Margin="0,0,10,0">
+                                <Button
+                                    Height="28"
+                                    Margin="0,0,10,0"
+                                    Padding="10,0"
+                                    Command="{Binding AddToLineCommand}"
+                                    FontSize="12"
+                                    Style="{DynamicResource CustomActionButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="PlaylistPlus" Width="14" Height="14"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Add Selection to Line" VerticalAlignment="Center"/>
+                                        <materialDesign:PackIcon
+                                            Width="14"
+                                            Height="14"
+                                            Margin="0,0,6,0"
+                                            VerticalAlignment="Center"
+                                            Kind="PlaylistPlus" />
+                                        <TextBlock VerticalAlignment="Center" Text="Add Selection to Line" />
                                     </StackPanel>
                                 </Button>
-                                <Button Command="{Binding AddInteractiveCommand}"
-                                        Style="{DynamicResource CustomActionButtonStyle}"
-                                        Height="28" FontSize="12" Padding="10,0" Margin="0,0,10,0"
-                                        ToolTip="Click to pick devices one by one">
+                                <Button
+                                    Height="28"
+                                    Margin="0,0,10,0"
+                                    Padding="10,0"
+                                    Command="{Binding AddInteractiveCommand}"
+                                    FontSize="12"
+                                    Style="{DynamicResource CustomActionButtonStyle}"
+                                    ToolTip="Click to pick devices one by one">
                                     <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="CursorDefaultClick" Width="14" Height="14"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Interactive Add" VerticalAlignment="Center"/>
+                                        <materialDesign:PackIcon
+                                            Width="14"
+                                            Height="14"
+                                            Margin="0,0,6,0"
+                                            VerticalAlignment="Center"
+                                            Kind="CursorDefaultClick" />
+                                        <TextBlock VerticalAlignment="Center" Text="Interactive Add" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
 
-                            <!-- Line Color Picker -->
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Color" Foreground="Gray" FontSize="11" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                <Button Command="{Binding ChangeColorCommand}"
-                                        Style="{DynamicResource CustomActionButtonStyle}"
-                                        Width="28" Height="28" Padding="0"
-                                        ToolTip="Change Line Color">
-                                    <Border Width="16" Height="16" CornerRadius="8" 
-                                            Background="{Binding ColorBrush}" 
-                                            BorderBrush="White" BorderThickness="1"/>
+                            <!--  Line Color Picker  -->
+                            <StackPanel
+                                Grid.Column="1"
+                                Margin="20,0,0,0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="11"
+                                    Foreground="Gray"
+                                    Text="Color" />
+                                <Button
+                                    Width="28"
+                                    Height="28"
+                                    Padding="0"
+                                    Command="{Binding ChangeColorCommand}"
+                                    Style="{DynamicResource CustomActionButtonStyle}"
+                                    ToolTip="Change Line Color">
+                                    <Border
+                                        Width="16"
+                                        Height="16"
+                                        Background="{Binding ColorBrush}"
+                                        BorderBrush="White"
+                                        BorderThickness="1"
+                                        CornerRadius="8" />
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -256,235 +347,364 @@
             </Border>
         </DataTemplate>
 
-        <!-- ==================== PANEL CARD TEMPLATE ==================== -->
+        <!--  ==================== PANEL CARD TEMPLATE ====================  -->
         <DataTemplate DataType="{x:Type vm:PanelViewModel}">
-            <Border Margin="0,0,0,10"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="6">
+            <Border
+                Margin="0,0,0,10"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="#333333"/>
+                        <Setter Property="Background" Value="#333333" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                <Setter Property="BorderBrush" Value="#4fc3f7"/>
+                                <Setter Property="BorderBrush" Value="#4fc3f7" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
 
-                <Expander IsExpanded="{Binding IsExpanded}" Background="Transparent" HorizontalContentAlignment="Stretch">
-                    <!-- PANEL HEADER -->
+                <Expander
+                    HorizontalContentAlignment="Stretch"
+                    Background="Transparent"
+                    IsExpanded="{Binding IsExpanded}">
+                    <!--  PANEL HEADER  -->
                     <Expander.Header>
-                        <Grid Background="Transparent" HorizontalAlignment="Stretch" MouseLeftButtonDown="Header_MouseLeftButtonDown" Loaded="HeaderGrid_Loaded">
+                        <Grid
+                            HorizontalAlignment="Stretch"
+                            Background="Transparent"
+                            Loaded="HeaderGrid_Loaded"
+                            MouseLeftButtonDown="Header_MouseLeftButtonDown">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <materialDesign:PackIcon Kind="Server" Width="20" Height="20"
-                                                         Foreground="#4fc3f7"
-                                                         Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" FontSize="15"
-                                         Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Center"
-                                         Style="{StaticResource InlineEditTextBoxStyle}" MinWidth="150"/>
+                            <StackPanel
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="20"
+                                    Height="20"
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="#4fc3f7"
+                                    Kind="Server" />
+                                <TextBox
+                                    MinWidth="150"
+                                    VerticalAlignment="Center"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    Foreground="{DynamicResource ForegroundBrush}"
+                                    Style="{StaticResource InlineEditTextBoxStyle}"
+                                    Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
-                            
-                            <Button Grid.Column="1" Command="{Binding DeleteCommand}"
-                                    Style="{DynamicResource CustomActionButtonStyle}"
-                                    Background="Transparent" BorderThickness="0"
-                                    Foreground="#FFFFFF"
-                                    Height="28" Width="28" Padding="0" ToolTip="Delete Panel">
-                                <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
+
+                            <Button
+                                Grid.Column="1"
+                                Width="28"
+                                Height="28"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding DeleteCommand}"
+                                Foreground="#FFFFFF"
+                                Style="{DynamicResource CustomActionButtonStyle}"
+                                ToolTip="Delete Panel">
+                                <materialDesign:PackIcon
+                                    Width="18"
+                                    Height="18"
+                                    Kind="Delete" />
                             </Button>
                         </Grid>
                     </Expander.Header>
 
-                    <!-- PANEL BODY -->
+                    <!--  PANEL BODY  -->
                     <StackPanel Margin="15,0,15,15">
-                        <Separator Background="{DynamicResource BorderBrush}" Margin="0,0,0,12"/>
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource BorderBrush}" />
 
-                        <!-- Controllers header + Add button -->
+                        <!--  Controllers header + Add button  -->
                         <Grid Margin="0,0,0,8">
-                            <TextBlock Text="Controllers" FontSize="13" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Center"/>
-                            <Button Command="{Binding AddControllerCommand}" HorizontalAlignment="Right"
-                                    Style="{DynamicResource CustomActionButtonStyle}"
-                                    Height="26" Padding="8,0" FontSize="11">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="13"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource ForegroundBrush}"
+                                Text="Controllers" />
+                            <Button
+                                Height="26"
+                                Padding="8,0"
+                                HorizontalAlignment="Right"
+                                Command="{Binding AddControllerCommand}"
+                                FontSize="11"
+                                Style="{DynamicResource CustomActionButtonStyle}">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Plus" Width="13" Height="13" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Add Controller" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon
+                                        Width="13"
+                                        Height="13"
+                                        Margin="0,0,4,0"
+                                        VerticalAlignment="Center"
+                                        Kind="Plus" />
+                                    <TextBlock VerticalAlignment="Center" Text="Add Controller" />
                                 </StackPanel>
                             </Button>
                         </Grid>
 
-                        <!-- Nested controller cards -->
-                        <ItemsControl ItemsSource="{Binding Controllers}" HorizontalContentAlignment="Stretch"/>
+                        <!--  Nested controller cards  -->
+                        <ItemsControl HorizontalContentAlignment="Stretch" ItemsSource="{Binding Controllers}" />
                     </StackPanel>
                 </Expander>
             </Border>
         </DataTemplate>
 
-        <!-- ==================== CONTROLLER CARD TEMPLATE ==================== -->
+        <!--  ==================== CONTROLLER CARD TEMPLATE ====================  -->
         <DataTemplate DataType="{x:Type vm:ControllerViewModel}">
-            <Border Margin="0,0,0,10"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="6">
+            <Border
+                Margin="0,0,0,10"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                <Setter Property="BorderBrush" Value="#4CAF50"/>
+                                <Setter Property="BorderBrush" Value="#4CAF50" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
 
-                <Expander IsExpanded="{Binding IsExpanded}" Background="Transparent" HorizontalContentAlignment="Stretch">
-                    <!-- CONTROLLER HEADER -->
+                <Expander
+                    HorizontalContentAlignment="Stretch"
+                    Background="Transparent"
+                    IsExpanded="{Binding IsExpanded}">
+                    <!--  CONTROLLER HEADER  -->
                     <Expander.Header>
-                        <Grid Background="Transparent" HorizontalAlignment="Stretch" MouseLeftButtonDown="Header_MouseLeftButtonDown" Loaded="HeaderGrid_Loaded">
+                        <Grid
+                            HorizontalAlignment="Stretch"
+                            Background="Transparent"
+                            Loaded="HeaderGrid_Loaded"
+                            MouseLeftButtonDown="Header_MouseLeftButtonDown">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <materialDesign:PackIcon Kind="ServerNetwork" Width="20" Height="20"
-                                                         Foreground="{DynamicResource IconBrush}"
-                                                         Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" FontSize="15"
-                                         Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Center"
-                                         Style="{StaticResource InlineEditTextBoxStyle}" MinWidth="150" Margin="0,0,15,0"/>
-                                <ComboBox ItemsSource="{Binding AvailableDevices}"
-                                          SelectedItem="{Binding SelectedDevice}"
-                                          DisplayMemberPath="Name" 
-                                          Width="250"
-                                          Style="{DynamicResource DarkComboBoxStyle}"
-                                          materialDesign:HintAssist.Hint="Select Device"
-                                          VerticalAlignment="Center" />
+                            <StackPanel
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="20"
+                                    Height="20"
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource IconBrush}"
+                                    Kind="ServerNetwork" />
+                                <TextBox
+                                    MinWidth="150"
+                                    Margin="0,0,15,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    Foreground="{DynamicResource ForegroundBrush}"
+                                    Style="{StaticResource InlineEditTextBoxStyle}"
+                                    Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                <ComboBox
+                                    Width="250"
+                                    VerticalAlignment="Center"
+                                    materialDesign:HintAssist.Hint="Select Device"
+                                    DisplayMemberPath="Name"
+                                    ItemsSource="{Binding AvailableDevices}"
+                                    SelectedItem="{Binding SelectedDevice}"
+                                    Style="{DynamicResource DarkComboBoxStyle}" />
                             </StackPanel>
 
-                            <!-- Aggregate summary chips (visible when collapsed) -->
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0">
-                                <Border Background="#1A4CAF50" CornerRadius="4" Padding="8,3" Margin="0,0,6,0">
-                                    <TextBlock Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold">
-                                        <Run Text="{Binding TotalLoadmA, StringFormat='{}{0:N0}'}"/>
-                                        <Run Text=" mA"/>
+                            <!--  Aggregate summary chips (visible when collapsed)  -->
+                            <StackPanel
+                                Grid.Column="1"
+                                Margin="0,0,10,0"
+                                Orientation="Horizontal">
+                                <Border
+                                    Margin="0,0,6,0"
+                                    Padding="8,3"
+                                    Background="#1A4CAF50"
+                                    CornerRadius="4">
+                                    <TextBlock
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Foreground="#4CAF50">
+                                        <Run Text="{Binding TotalLoadmA, StringFormat='{}{0:N0}'}" />
+                                        <Run Text=" mA" />
                                     </TextBlock>
                                 </Border>
-                                <Border Background="#1A448AFF" CornerRadius="4" Padding="8,3">
-                                    <TextBlock Foreground="#64B5F6" FontSize="11" FontWeight="SemiBold">
-                                        <Run Text="{Binding TotalAddressCount}"/>
-                                        <Run Text=" addr"/>
+                                <Border
+                                    Padding="8,3"
+                                    Background="#1A448AFF"
+                                    CornerRadius="4">
+                                    <TextBlock
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Foreground="#64B5F6">
+                                        <Run Text="{Binding TotalAddressCount}" />
+                                        <Run Text=" addr" />
                                     </TextBlock>
                                 </Border>
                             </StackPanel>
 
-                            <Button Grid.Column="2" Command="{Binding DeleteCommand}"
-                                    Style="{DynamicResource CustomActionButtonStyle}"
-                                    Background="Transparent" BorderThickness="0"
-                                    Foreground="#FFFFFF"
-                                    Height="28" Width="28" Padding="0" ToolTip="Delete Controller">
-                                <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
+                            <Button
+                                Grid.Column="2"
+                                Width="28"
+                                Height="28"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding DeleteCommand}"
+                                Foreground="#FFFFFF"
+                                Style="{DynamicResource CustomActionButtonStyle}"
+                                ToolTip="Delete Controller">
+                                <materialDesign:PackIcon
+                                    Width="18"
+                                    Height="18"
+                                    Kind="Delete" />
                             </Button>
                         </Grid>
                     </Expander.Header>
 
-                    <!-- CONTROLLER BODY -->
+                    <!--  CONTROLLER BODY  -->
                     <StackPanel Margin="15,0,15,15">
-                        <Separator Background="{DynamicResource BorderBrush}" Margin="0,0,0,12"/>
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource BorderBrush}" />
 
-                        <!-- Controller aggregate gauges -->
-                        <Border Background="{DynamicResource PrimaryBackgroundBrush}"
-                                CornerRadius="4" Padding="12,10" Margin="0,0,0,14">
+                        <!--  Controller aggregate gauges  -->
+                        <Border
+                            Margin="0,0,0,14"
+                            Padding="12,10"
+                            Background="{DynamicResource PrimaryBackgroundBrush}"
+                            CornerRadius="4">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Circular gauges -->
+                                <!--  Circular gauges  -->
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                    <controls:CircularGauge Title="Controller Load"
-                                        Value="{Binding TotalLoadmA}"
+                                    <controls:CircularGauge
+                                        Title="Controller Load"
+                                        Width="120"
+                                        Height="120"
+                                        Margin="0,0,15,0"
+                                        ErrorThreshold="1.00"
                                         MaxValue="{Binding MaxLoadmA}"
                                         UnitText="mA"
-                                        WarningThreshold="0.80" ErrorThreshold="1.00"
-                                        Height="120" Width="120" Margin="0,0,15,0"/>
-                                    <controls:CircularGauge Title="Addresses"
-                                        Value="{Binding TotalAddressCount}"
+                                        WarningThreshold="0.80"
+                                        Value="{Binding TotalLoadmA}" />
+                                    <controls:CircularGauge
+                                        Title="Addresses"
+                                        Width="120"
+                                        Height="120"
+                                        ErrorThreshold="1.00"
                                         MaxValue="{Binding MaxAddressCount}"
                                         UnitText="addr"
-                                        WarningThreshold="0.80" ErrorThreshold="1.00"
-                                        Height="120" Width="120"/>
+                                        WarningThreshold="0.80"
+                                        Value="{Binding TotalAddressCount}" />
                                 </StackPanel>
 
-                                <!-- Text bars -->
+                                <!--  Text bars  -->
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <TextBlock Text="Aggregate Load" Foreground="Gray" FontSize="11" Margin="0,0,0,3"/>
+                                    <TextBlock
+                                        Margin="0,0,0,3"
+                                        FontSize="11"
+                                        Foreground="Gray"
+                                        Text="Aggregate Load" />
                                     <Grid Height="6" Margin="0,0,0,10">
-                                        <Border Background="#333333" CornerRadius="3"/>
-                                        <Border CornerRadius="3" HorizontalAlignment="Left" Style="{StaticResource GreenBarFillCtrl}">
+                                        <Border Background="#333333" CornerRadius="3" />
+                                        <Border
+                                            HorizontalAlignment="Left"
+                                            CornerRadius="3"
+                                            Style="{StaticResource GreenBarFillCtrl}">
                                             <Border.Width>
                                                 <MultiBinding Converter="{x:Static ui:RatioToWidthConverter.Instance}">
-                                                    <Binding Path="LoadRatio"/>
-                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                    <Binding Path="LoadRatio" />
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                                                 </MultiBinding>
                                             </Border.Width>
                                         </Border>
                                     </Grid>
-                                    <TextBlock Text="Aggregate Addresses" Foreground="Gray" FontSize="11" Margin="0,0,0,3"/>
+                                    <TextBlock
+                                        Margin="0,0,0,3"
+                                        FontSize="11"
+                                        Foreground="Gray"
+                                        Text="Aggregate Addresses" />
                                     <Grid Height="6">
-                                        <Border Background="#333333" CornerRadius="3"/>
-                                        <Border CornerRadius="3" HorizontalAlignment="Left">
+                                        <Border Background="#333333" CornerRadius="3" />
+                                        <Border HorizontalAlignment="Left" CornerRadius="3">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#4CAF50"/>
+                                                    <Setter Property="Background" Value="#4CAF50" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsOverAddress}" Value="True">
-                                                            <Setter Property="Background" Value="#F44336"/>
+                                                            <Setter Property="Background" Value="#F44336" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
                                             <Border.Width>
                                                 <MultiBinding Converter="{x:Static ui:RatioToWidthConverter.Instance}">
-                                                    <Binding Path="AddressRatio"/>
-                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                    <Binding Path="AddressRatio" />
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                                                 </MultiBinding>
                                             </Border.Width>
                                         </Border>
                                     </Grid>
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <TextBlock Text="Lines Assigned:" Foreground="Gray" FontSize="11" Margin="0,0,4,0"/>
+                                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                        <TextBlock
+                                            Margin="0,0,4,0"
+                                            FontSize="11"
+                                            Foreground="Gray"
+                                            Text="Lines Assigned:" />
                                         <TextBlock FontSize="11" Foreground="{DynamicResource ForegroundBrush}">
-                                            <Run Text="{Binding Lines.Count, Mode=OneWay}"/>
-                                            <Run Text=" / " Foreground="Gray"/>
-                                            <Run Text="{Binding SelectedDevice.DaliLines, TargetNullValue='∞'}"/>
+                                            <Run Text="{Binding Lines.Count, Mode=OneWay}" />
+                                            <Run Foreground="Gray" Text=" / " />
+                                            <Run Text="{Binding SelectedDevice.DaliLines, TargetNullValue='∞'}" />
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
                         </Border>
 
-                        <!-- Lines header + Add button -->
+                        <!--  Lines header + Add button  -->
                         <Grid Margin="0,0,0,8">
-                            <TextBlock Text="Lines" FontSize="13" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Center"/>
-                            <Button Command="{Binding AddLineCommand}" HorizontalAlignment="Right"
-                                    Style="{DynamicResource CustomActionButtonStyle}"
-                                    Height="26" Padding="8,0" FontSize="11">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="13"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource ForegroundBrush}"
+                                Text="Lines" />
+                            <Button
+                                Height="26"
+                                Padding="8,0"
+                                HorizontalAlignment="Right"
+                                Command="{Binding AddLineCommand}"
+                                FontSize="11"
+                                Style="{DynamicResource CustomActionButtonStyle}">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Plus" Width="13" Height="13" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Add Line" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon
+                                        Width="13"
+                                        Height="13"
+                                        Margin="0,0,4,0"
+                                        VerticalAlignment="Center"
+                                        Kind="Plus" />
+                                    <TextBlock VerticalAlignment="Center" Text="Add Line" />
                                 </StackPanel>
                             </Button>
                         </Grid>
 
-                        <!-- Nested line cards -->
-                        <ItemsControl ItemsSource="{Binding Lines}" HorizontalContentAlignment="Stretch"/>
+                        <!--  Nested line cards  -->
+                        <ItemsControl HorizontalContentAlignment="Stretch" ItemsSource="{Binding Lines}" />
                     </StackPanel>
                 </Expander>
             </Border>
@@ -493,88 +713,158 @@
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Toolbar -->
-            <RowDefinition Height="Auto"/> <!-- Selection summary dashboard -->
-            <RowDefinition Height="*"/>    <!-- Controllers list -->
-            <RowDefinition Height="Auto"/> <!-- Warnings expander -->
-            <RowDefinition Height="Auto"/> <!-- Status bar -->
+            <RowDefinition Height="Auto" />
+            <!--  Toolbar  -->
+            <RowDefinition Height="Auto" />
+            <!--  Selection summary dashboard  -->
+            <RowDefinition Height="*" />
+            <!--  Controllers list  -->
+            <RowDefinition Height="Auto" />
+            <!--  Warnings expander  -->
+            <RowDefinition Height="Auto" />
+            <!--  Status bar  -->
         </Grid.RowDefinitions>
 
-        <!-- Toolbar -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
-            <Button Command="{Binding RefreshSelectionCommand}"
-                    Style="{DynamicResource CustomActionButtonStyle}"
-                    Height="32" Padding="12,0"
-                    ToolTip="Read current Revit selection and compute totals">
+        <!--  Toolbar  -->
+        <StackPanel
+            Grid.Row="0"
+            Margin="0,0,0,14"
+            Orientation="Horizontal">
+            <Button
+                Height="32"
+                Margin="0"
+                Padding="12,0"
+                Command="{Binding RefreshSelectionCommand}"
+                Style="{DynamicResource CustomActionButtonStyle}"
+                ToolTip="Read current Revit selection and compute totals">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16"
-                                             VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="Refresh Selection" VerticalAlignment="Center" FontSize="12"/>
+                    <materialDesign:PackIcon
+                        Width="16"
+                        Height="16"
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Kind="Refresh" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Text="Refresh Selection" />
                 </StackPanel>
             </Button>
-            <Button Command="{Binding ResetOverridesCommand}"
-                    Style="{DynamicResource CustomActionButtonStyle}"
-                    Height="32" Padding="12,0" Margin="0,0,-4,0"
-                    ToolTip="Clear DALI view filter overrides">
+            <Button
+                Height="32"
+                Margin="10,0,0,0"
+                Padding="12,0"
+                Command="{Binding ResetOverridesCommand}"
+                Style="{DynamicResource CustomActionButtonStyle}"
+                ToolTip="Clear DALI view filter overrides">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="EraserVariant" Width="16" Height="16"
-                                             VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="Reset Overrides" VerticalAlignment="Center" FontSize="12"/>
+                    <materialDesign:PackIcon
+                        Width="16"
+                        Height="16"
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Kind="EraserVariant" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Text="Reset Overrides" />
                 </StackPanel>
             </Button>
         </StackPanel>
 
 
 
-        <!-- Panels List -->
+        <!--  Panels List  -->
         <Grid Grid.Row="2" Margin="0,0,0,14">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Margin="0,0,0,10">
-                <TextBlock Text="Panels" FontSize="14" FontWeight="SemiBold"
-                           Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Center"/>
-                <Button Command="{Binding AddPanelCommand}"
-                        Style="{DynamicResource CustomActionButtonStyle}"
-                        HorizontalAlignment="Right" Height="28" Padding="10,0" FontSize="12">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource ForegroundBrush}"
+                    Text="Panels" />
+                <Button
+                    Height="28"
+                    Padding="10,0"
+                    HorizontalAlignment="Right"
+                    Command="{Binding AddPanelCommand}"
+                    FontSize="12"
+                    Style="{DynamicResource CustomActionButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Add Panel" VerticalAlignment="Center"/>
+                        <materialDesign:PackIcon
+                            Width="14"
+                            Height="14"
+                            Margin="0,0,5,0"
+                            VerticalAlignment="Center"
+                            Kind="Plus" />
+                        <TextBlock VerticalAlignment="Center" Text="Add Panel" />
                     </StackPanel>
                 </Button>
             </Grid>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding Panels}" HorizontalContentAlignment="Stretch"/>
+            <ScrollViewer
+                Grid.Row="1"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+                <ItemsControl HorizontalContentAlignment="Stretch" ItemsSource="{Binding Panels}" />
             </ScrollViewer>
         </Grid>
 
-        <!-- Warnings -->
-        <Expander Grid.Row="3" Header="Warnings" IsExpanded="False"
-                  Foreground="{DynamicResource ForegroundBrush}" Margin="0,0,0,8">
-            <ListBox ItemsSource="{Binding Warnings}" Background="Transparent" BorderThickness="0"
-                     Foreground="#FFCC00" FontSize="11" MaxHeight="80"/>
+        <!--  Warnings  -->
+        <Expander
+            Grid.Row="3"
+            Margin="0,0,0,8"
+            Foreground="{DynamicResource ForegroundBrush}"
+            Header="Warnings"
+            IsExpanded="False">
+            <ListBox
+                MaxHeight="80"
+                Background="Transparent"
+                BorderThickness="0"
+                FontSize="11"
+                Foreground="#FFCC00"
+                ItemsSource="{Binding Warnings}" />
         </Expander>
 
-        <!-- Status Bar -->
-        <Border Grid.Row="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="0,8,0,0">
+        <!--  Status Bar  -->
+        <Border
+            Grid.Row="4"
+            Padding="0,8,0,0"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="0,1,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="Gray" FontSize="12" VerticalAlignment="Center"/>
-                <ProgressBar Grid.Column="1" IsIndeterminate="True" Width="100" Height="4"
-                             Foreground="#4CAF50" Background="#333333" BorderThickness="0"
-                             VerticalAlignment="Center"
-                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Foreground="Gray"
+                    Text="{Binding StatusMessage}" />
+                <ProgressBar
+                    Grid.Column="1"
+                    Width="100"
+                    Height="4"
+                    VerticalAlignment="Center"
+                    Background="#333333"
+                    BorderThickness="0"
+                    Foreground="#4CAF50"
+                    IsIndeterminate="True"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
             </Grid>
         </Border>
 
-        <!-- Non-Dimming Click Blocker -->
-        <Grid Grid.RowSpan="4" Background="Transparent" 
-              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
+        <!--  Non-Dimming Click Blocker  -->
+        <Grid
+            Grid.RowSpan="4"
+            Background="Transparent"
+            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
     </Grid>
 </UserControl>
