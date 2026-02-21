@@ -58,6 +58,7 @@
                           Background="Transparent"
                           BorderThickness="0"
                           Foreground="{DynamicResource ForegroundBrush}"
+                          ColumnHeaderStyle="{DynamicResource CustomDataGridColumnHeaderStyle}"
                           IsReadOnly="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="Auto" CanUserSort="True"/>
@@ -78,18 +79,42 @@
                         <StackPanel Visibility="{Binding ActiveEditDevice, Converter={StaticResource NullToCollapsedConverter}}">
                             
                             <!-- ID (Read-only reference) -->
-                            <TextBlock Text="Database ID" Foreground="Gray" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding ActiveEditDevice.Id}" IsReadOnly="True" Style="{DynamicResource CustomTextBoxStyle}" Foreground="DarkGray" Background="#111" Margin="0,0,0,10"/>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Database ID" Foreground="Gray" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.Id}" IsReadOnly="True" Style="{DynamicResource CustomTextBoxStyle}" Foreground="DarkGray" Background="#111"/>
+                            </Grid>
 
                             <!-- General Info -->
-                            <TextBlock Text="Equipment Type (e.g., controller, power_supply)" Foreground="Gray" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding ActiveEditDevice.Type, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}" Margin="0,0,0,10"/>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Equipment Type" Foreground="Gray" VerticalAlignment="Center" ToolTip="e.g., controller, power_supply"/>
+                                <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.Type, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                            </Grid>
 
-                            <TextBlock Text="Model Designation" Foreground="Gray" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding ActiveEditDevice.Model, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}" Margin="0,0,0,10"/>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Model Designation" Foreground="Gray" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.Model, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                            </Grid>
 
-                            <TextBlock Text="Display Name" Foreground="Gray" Margin="0,0,0,2"/>
-                            <TextBox Text="{Binding ActiveEditDevice.Name, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}" Margin="0,0,0,15"/>
+                            <Grid Margin="0,0,0,15">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Display Name" Foreground="Gray" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.Name, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                            </Grid>
 
                             <!-- Divider -->
                             <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,5,0,15"/>
@@ -104,14 +129,22 @@
                                         <ColumnDefinition Width="20"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="DALI Lines Supported" Foreground="Gray" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding ActiveEditDevice.DaliLines, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Max Addresses Per Line" Foreground="Gray" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding ActiveEditDevice.MaxAddressesPerLine, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
-                                    </StackPanel>
+                                    <Grid Grid.Column="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Lines Supported" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.DaliLines, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                                    </Grid>
+                                    <Grid Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Max Addresses" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.MaxAddressesPerLine, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                                    </Grid>
                                 </Grid>
 
                                 <Grid Margin="0,0,0,15">
@@ -120,14 +153,22 @@
                                         <ColumnDefinition Width="20"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Rated Output (mA)" Foreground="Gray" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding ActiveEditDevice.RatedCurrentmAPerLine, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Guaranteed Output (mA)" Foreground="Gray" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding ActiveEditDevice.GuaranteedCurrentmAPerLine, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
-                                    </StackPanel>
+                                    <Grid Grid.Column="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Rated Output (mA)" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.RatedCurrentmAPerLine, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                                    </Grid>
+                                    <Grid Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Guaranteed Output (mA)" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.GuaranteedCurrentmAPerLine, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                                    </Grid>
                                 </Grid>
                             </StackPanel>
 
@@ -140,40 +181,34 @@
                                         <ColumnDefinition Width="20"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Adds Current (mA)" Foreground="Gray" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding ActiveEditDevice.AddsCurrentmA, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Extends Length (Meters)" Foreground="Gray" Margin="0,0,0,2"/>
-                                        <TextBox Text="{Binding ActiveEditDevice.ExtendsLineLengthMetersTo, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
-                                    </StackPanel>
+                                    <Grid Grid.Column="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Adds Current (mA)" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.AddsCurrentmA, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                                    </Grid>
+                                    <Grid Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Extends Length (M)" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ActiveEditDevice.ExtendsLineLengthMetersTo, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditBox_TextChanged" Style="{DynamicResource CustomTextBoxStyle}"/>
+                                    </Grid>
                                 </Grid>
                             </StackPanel>
 
                             <!-- Actions -->
-                            <Grid Margin="0,20,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Delete -->
-                                <Button Grid.Column="0" Command="{Binding DeleteDeviceCommand}" CommandParameter="{Binding ActiveEditDevice}" HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Foreground="LightCoral" ToolTip="Delete this device">
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Delete" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                <Button Content="Delete Device" Command="{Binding DeleteDeviceCommand}" CommandParameter="{Binding ActiveEditDevice}" Style="{DynamicResource CustomCancelButtonStyle}" Height="35" Width="120" FontSize="13" Margin="0,0,10,0">
                                 </Button>
-
-                                <!-- Save -->
-                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <TextBlock Text="* Unsaved Changes" Foreground="Gold" FontStyle="Italic" VerticalAlignment="Center" Margin="0,0,10,0"
-                                               Visibility="{Binding HasChanges, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                    <Button Content="Save Changes" Command="{Binding SaveDeviceCommand}" Style="{DynamicResource CustomActionButtonStyle}" Height="35" Width="120" FontSize="13" />
-                                </StackPanel>
-                            </Grid>
+                                
+                                <TextBlock Text="* Unsaved Changes" Foreground="Gold" FontStyle="Italic" VerticalAlignment="Center" Margin="0,0,10,0"
+                                           Visibility="{Binding HasChanges, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                <Button Content="Save Changes" Command="{Binding SaveDeviceCommand}" Style="{DynamicResource CustomActionButtonStyle}" Height="35" Width="120" FontSize="13" />
+                            </StackPanel>
                         </StackPanel>
 
                         <!-- Fallback empty state -->
