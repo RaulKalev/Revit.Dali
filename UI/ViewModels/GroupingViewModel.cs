@@ -272,10 +272,16 @@ namespace Dali.UI.ViewModels
             if (string.IsNullOrWhiteSpace(line.Name)) return;
 
             var settings = _settingsService.Load();
+            
+            string pName = line.PanelName?.Trim() ?? string.Empty;
+            string cName = line.ControllerName?.Trim() ?? string.Empty;
+            string dName = line.ControllerModelName?.Trim() ?? string.Empty;
+            string fullControllerString = $"{pName} - {cName} - {dName}".Trim(' ', '-');
+
             var req = new RecalculateLineGaugesRequest(
                 settings,
                 line.Name,
-                line.ControllerName,
+                fullControllerString,
                 (load, addr) => 
                 {
                     line.LoadmA = load;
