@@ -304,6 +304,27 @@ namespace Dali.UI.ViewModels
                 }
             }
             ActiveController = expanded;
+
+            if (expanded != null && expanded.Lines != null)
+            {
+                var activeLines = expanded.Lines.Select(l => new Dali.Services.Revit.LineHighlightInfo
+                {
+                    PanelName = l.PanelName,
+                    ControllerModelName = l.ControllerModelName,
+                    LineName = l.Name,
+                    ControllerName = l.ControllerName,
+                    ColorHex = l.ColorHex
+                }).ToList();
+
+                var req = new Dali.Services.Revit.IsolateControllerHighlightsRequest(
+                    _settingsService.Load(),
+                    _highlightRegistry,
+                    activeLines,
+                    msg => { StatusMessage = msg; }
+                );
+
+                _eventService.Raise(req);
+            }
         }
 
         public ICommand AddPanelCommand { get; }
