@@ -108,6 +108,12 @@ namespace Dali.UI
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             SaveWindowState();
+            
+            // Clear any active DALI highlight filters
+            if (GroupingVM?.ResetOverridesCommand?.CanExecute(null) == true)
+            {
+                GroupingVM.ResetOverridesCommand.Execute(null);
+            }
         }
 
         #region Actions
