@@ -44,10 +44,6 @@ namespace Dali.UI.ViewModels
             _model = model ?? throw new ArgumentNullException(nameof(model));
             AvailableDevices = new ObservableCollection<DeviceDto>(availableDevices ?? Enumerable.Empty<DeviceDto>());
             
-            if (!string.IsNullOrEmpty(_model.DeviceId))
-            {
-                _selectedDevice = AvailableDevices.FirstOrDefault(d => d.Id == _model.DeviceId);
-            }
             _addLineAction = addLineAction;
             _deleteAction = deleteAction;
             _addToLineAction = addToLineAction;
@@ -74,6 +70,15 @@ namespace Dali.UI.ViewModels
             }, _ => CanAddLine);
             
             DeleteCommand = new RelayCommand(_ => _deleteAction?.Invoke(this));
+
+            if (!string.IsNullOrEmpty(_model.DeviceId))
+            {
+                _selectedDevice = AvailableDevices.FirstOrDefault(d => d.Id == _model.DeviceId);
+                if (_selectedDevice != null)
+                {
+                    ApplyDeviceLimits(_selectedDevice);
+                }
+            }
         }
 
         public ControllerDefinition Model => _model;
@@ -105,28 +110,34 @@ namespace Dali.UI.ViewModels
                 {
                     _model.DeviceId = value?.Id;
                     
-                    if (value != null)
-                    {
-                        if (value.RatedCurrentmAPerLine.HasValue)
-                        {
-                            MaxLoadmA = value.RatedCurrentmAPerLine.Value * (value.DaliLines ?? 1);
-                            foreach(var line in Lines) line.MaxLoadmA = value.RatedCurrentmAPerLine.Value;
-                        }
-                        if (value.MaxAddressesPerLine.HasValue)
-                        {
-                            MaxAddressCount = value.MaxAddressesPerLine.Value * (value.DaliLines ?? 1);
-                            foreach(var line in Lines) line.MaxAddressCount = value.MaxAddressesPerLine.Value;
-                        }
-                    }
-
-                    foreach(var line in Lines) line.ControllerModelName = value?.Name;
+                    ApplyDeviceLimits(value);
                     
                     _onDeviceChanged?.Invoke(this, oldDevice);
-                    RecalcTotals();
-                    OnPropertyChanged(nameof(CanAddLine));
                     CommandManager.InvalidateRequerySuggested();
                 }
             }
+        }
+
+        private void ApplyDeviceLimits(DeviceDto device)
+        {
+            if (device != null)
+            {
+                if (device.RatedCurrentmAPerLine.HasValue)
+                {
+                    MaxLoadmA = device.RatedCurrentmAPerLine.Value * (device.DaliLines ?? 1);
+                    foreach(var line in Lines) line.MaxLoadmA = device.RatedCurrentmAPerLine.Value;
+                }
+                if (device.MaxAddressesPerLine.HasValue)
+                {
+                    MaxAddressCount = device.MaxAddressesPerLine.Value * (device.DaliLines ?? 1);
+                    foreach(var line in Lines) line.MaxAddressCount = device.MaxAddressesPerLine.Value;
+                }
+            }
+
+            foreach(var line in Lines) line.ControllerModelName = device?.Name;
+            
+            RecalcTotals();
+            OnPropertyChanged(nameof(CanAddLine));
         }
 
         public void UpdateAvailableDevices(IEnumerable<DeviceDto> devices)
