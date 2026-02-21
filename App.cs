@@ -27,22 +27,12 @@ namespace Dali
             SettingsService = new Services.SettingsService(Logger);
             ParameterResolver = new Services.ParameterResolver(Logger);
 
-            // ---- CRASH DIAGNOSTICS ----
             // Catch ALL unhandled exceptions and write full stack trace to crash.log
             // This prevents the endless popup loop AND gives us diagnostic info.
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 LogCrash("AppDomain.UnhandledException", e.ExceptionObject as Exception);
             };
-
-            if (System.Windows.Application.Current != null)
-            {
-                System.Windows.Application.Current.DispatcherUnhandledException += (s, e) =>
-                {
-                    LogCrash("Dispatcher.UnhandledException", e.Exception);
-                    e.Handled = true; // Prevent the endless popup loop
-                };
-            }
             // ---- END CRASH DIAGNOSTICS ----
 
             // Define the custom tab name
@@ -65,9 +55,9 @@ namespace Dali
             var duplicateSheetsButton = ribbonPanel.CreatePushButton<DaliCommand>()
                 .SetLargeImage("pack://application:,,,/Dali;component/Assets/Dali.tiff")
                 .SetText("Dali")
-                .SetToolTip("Manage sheet duplication and batch renaming.")
-                .SetLongDescription("Dali allows you to duplicate sheets in bulk, rename with find/replace, prefixes/suffixes, and preview changes before applying.")
-                .SetContextualHelp("https://github.com/RaulKalev/Dali");
+                .SetToolTip("Manage DALI lighting control assignments.")
+                .SetLongDescription("Dali allows you to manage controller and line capacities, and automatically populate parameters for selected light fixtures.")
+                .SetContextualHelp("https://github.com/RaulKalev/Revit.Dali");
 
             return Result.Succeeded;
         }

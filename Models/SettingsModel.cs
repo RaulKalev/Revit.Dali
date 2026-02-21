@@ -36,5 +36,12 @@ namespace Dali.Models
 
         // NEW: Top-level Panels
         public List<PanelDefinition> SavedPanels { get; set; } = new List<PanelDefinition>();
+
+        // 5. UI State
+        public bool IsDarkMode { get; set; } = true;
+        public double WindowLeft { get; set; } = double.NaN;
+        public double WindowTop { get; set; } = double.NaN;
+        public double WindowWidth { get; set; } = double.NaN;
+        public double WindowHeight { get; set; } = double.NaN;
     }
 }

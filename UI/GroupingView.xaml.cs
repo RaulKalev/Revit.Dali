@@ -15,6 +15,34 @@ namespace Dali.UI
         {
             InitializeComponent();
         }
+
+        private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // If the user clicks the header content (which has a transparent background), 
+            // we mark it as handled so the event doesn't bubble up to the Expander's ToggleButton.
+            // TextBoxes inside the header already mark MouseLeftButtonDown as handled, so they will still receive focus.
+            // The actual Expander arrow is located outside of this Grid/StackPanel, so clicking the arrow will still work!
+            e.Handled = true;
+        }
+
+        private void HeaderGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe)
+            {
+                // Find the ContentPresenter wrapper from the Expander's default template
+                var parent = System.Windows.Media.VisualTreeHelper.GetParent(fe);
+                while (parent != null && !(parent is System.Windows.Controls.ContentPresenter))
+                {
+                    parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+                }
+                
+                if (parent is System.Windows.Controls.ContentPresenter cp)
+                {
+                    // Force the parent container to stretch, allowing our Grid and right-aligned delete button to work.
+                    cp.HorizontalAlignment = HorizontalAlignment.Stretch;
+                }
+            }
+        }
     }
 
     /// <summary>

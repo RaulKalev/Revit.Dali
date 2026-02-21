@@ -22,12 +22,6 @@ namespace Dali.UI
     {
         #region Constants / PInvoke
 
-        private const string ConfigFilePath = @"C:\ProgramData\RK Tools\Dali\config.json";
-        private const string WindowLeftKey = "DaliWindow.Left";
-        private const string WindowTopKey = "DaliWindow.Top";
-        private const string WindowWidthKey = "DaliWindow.Width";
-        private const string WindowHeightKey = "DaliWindow.Height";
-
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -211,8 +205,8 @@ namespace Dali.UI
             try
             {
                 var themeUri = new Uri(_isDarkMode 
-                    ? "pack://application:,,,/ProSchedules;component/UI/Themes/DarkTheme.xaml" 
-                    : "pack://application:,,,/ProSchedules;component/UI/Themes/LightTheme.xaml", UriKind.Absolute);
+                    ? "pack://application:,,,/Dali;component/UI/Themes/DarkTheme.xaml" 
+                    : "pack://application:,,,/Dali;component/UI/Themes/LightTheme.xaml", UriKind.Absolute);
                 
                 var newDict = new ResourceDictionary { Source = themeUri };
                 
@@ -250,11 +244,8 @@ namespace Dali.UI
         {
             try
             {
-                var config = LoadConfig();
-                if (TryGetBool(config, "IsDarkMode", out var isDark))
-                {
-                    _isDarkMode = isDark;
-                }
+                var settings = _settingsService.Load();
+                _isDarkMode = settings.IsDarkMode;
             }
             catch (Exception)
             {
@@ -280,9 +271,9 @@ namespace Dali.UI
         {
             try
             {
-                var config = LoadConfig();
-                config["IsDarkMode"] = _isDarkMode;
-                SaveConfig(config);
+                var settings = _settingsService.Load();
+                settings.IsDarkMode = _isDarkMode;
+                _settingsService.Save(settings);
             }
             catch (Exception ex)
             {
@@ -299,14 +290,14 @@ namespace Dali.UI
         {
             try
             {
-                var config = LoadConfig();
-                bool hasLeft = TryGetDouble(config, WindowLeftKey, out var left);
-                bool hasTop = TryGetDouble(config, WindowTopKey, out var top);
-                bool hasWidth = TryGetDouble(config, WindowWidthKey, out var width);
-                bool hasHeight = TryGetDouble(config, WindowHeightKey, out var height);
+                var settings = _settingsService.Load();
+                double left = settings.WindowLeft;
+                double top = settings.WindowTop;
+                double width = settings.WindowWidth;
+                double height = settings.WindowHeight;
 
-                bool hasSize = hasWidth && hasHeight && width > 0 && height > 0;
-                bool hasPos = hasLeft && hasTop && !double.IsNaN(left) && !double.IsNaN(top);
+                bool hasSize = !double.IsNaN(width) && !double.IsNaN(height) && width > 0 && height > 0;
+                bool hasPos = !double.IsNaN(left) && !double.IsNaN(top);
 
                 if (!hasSize && !hasPos)
                 {
@@ -336,124 +327,23 @@ namespace Dali.UI
         {
             try
             {
-                var config = LoadConfig();
+                var settings = _settingsService.Load();
                 var bounds = WindowState == WindowState.Normal
                     ? new Rect(Left, Top, Width, Height)
                     : RestoreBounds;
 
-                config[WindowLeftKey] = bounds.Left;
-                config[WindowTopKey] = bounds.Top;
-                config[WindowWidthKey] = bounds.Width;
-                config[WindowHeightKey] = bounds.Height;
+                settings.WindowLeft = bounds.Left;
+                settings.WindowTop = bounds.Top;
+                settings.WindowWidth = bounds.Width;
+                settings.WindowHeight = bounds.Height;
 
-                SaveConfig(config);
+                _settingsService.Save(settings);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to save window state: {ex.Message}", "Save Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        #endregion
-
-        #region Config Helpers
-
-        private Dictionary<string, object> LoadConfig()
-        {
-            try
-            {
-                if (File.Exists(ConfigFilePath))
-                {
-                    var json = File.ReadAllText(ConfigFilePath);
-                    var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
-                    if (config != null)
-                    {
-                        return config;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-            }
-
-            return new Dictionary<string, object>();
-        }
-
-        private void SaveConfig(Dictionary<string, object> config)
-        {
-            var dir = Path.GetDirectoryName(ConfigFilePath);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-
-            File.WriteAllText(ConfigFilePath, JsonConvert.SerializeObject(config, Formatting.Indented));
-        }
-
-        private static bool TryGetBool(Dictionary<string, object> config, string key, out bool value)
-        {
-            value = false;
-            if (!config.TryGetValue(key, out var raw) || raw == null)
-            {
-                return false;
-            }
-
-            if (raw is bool boolValue)
-            {
-                value = boolValue;
-                return true;
-            }
-
-            if (raw is JToken token && token.Type == JTokenType.Boolean)
-            {
-                value = token.Value<bool>();
-                return true;
-            }
-
-            if (raw is string text && bool.TryParse(text, out var parsed))
-            {
-                value = parsed;
-                return true;
-            }
-
-            return false;
-        }
-
-        private static bool TryGetDouble(Dictionary<string, object> config, string key, out double value)
-        {
-            value = 0;
-            if (!config.TryGetValue(key, out var raw) || raw == null)
-            {
-                return false;
-            }
-
-            switch (raw)
-            {
-                case double doubleValue:
-                    value = doubleValue;
-                    return true;
-                case float floatValue:
-                    value = floatValue;
-                    return true;
-                case decimal decimalValue:
-                    value = (double)decimalValue;
-                    return true;
-                case long longValue:
-                    value = longValue;
-                    return true;
-                case int intValue:
-                    value = intValue;
-                    return true;
-                case JToken token when token.Type == JTokenType.Float || token.Type == JTokenType.Integer:
-                    value = token.Value<double>();
-                    return true;
-                case string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed):
-                    value = parsed;
-                    return true;
-            }
-
-            return false;
         }
 
         #endregion

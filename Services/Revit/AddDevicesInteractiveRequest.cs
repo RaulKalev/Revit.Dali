@@ -16,6 +16,8 @@ namespace Dali.Services.Revit
     public class AddDevicesInteractiveRequest : IExternalEventRequest
     {
         private readonly SettingsModel _settings;
+        private readonly string _panelName;
+        private readonly string _controllerModelName;
         private readonly string _activeLineName;
         private readonly string _controllerName;
         private readonly HighlightRegistry _highlightRegistry;
@@ -26,6 +28,8 @@ namespace Dali.Services.Revit
 
         public AddDevicesInteractiveRequest(
             SettingsModel settings,
+            string panelName,
+            string controllerModelName,
             string activeLineName,
             string controllerName,
             HighlightRegistry highlightRegistry,
@@ -35,6 +39,8 @@ namespace Dali.Services.Revit
             string colorHex = null)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _panelName = panelName;
+            _controllerModelName = controllerModelName;
             _activeLineName = activeLineName;
             _controllerName = controllerName;
             _highlightRegistry = highlightRegistry;
@@ -99,8 +105,14 @@ namespace Dali.Services.Revit
                 {
                     t.Start();
                     var highlighter = new ViewFilterHighlighter();
+                    
+                    string pName = _panelName?.Trim() ?? string.Empty;
+                    string cName = _controllerName?.Trim() ?? string.Empty;
+                    string mName = _controllerModelName?.Trim() ?? string.Empty;
+                    string combinedControllerString = $"{pName} - {cName} - {mName}".Trim(' ', '-');
+
                     var hlResult = highlighter.ApplyLineHighlight(
-                        doc, app.ActiveUIDocument.ActiveView, _settings, _controllerName, _activeLineName, _highlightRegistry, _colorHex);
+                        doc, app.ActiveUIDocument.ActiveView, _settings, combinedControllerString, _activeLineName, _highlightRegistry, _colorHex);
                     
                     if (hlResult.Success && hlResult.ElementsOnLine != null)
                     {
@@ -125,7 +137,10 @@ namespace Dali.Services.Revit
             string lineIdParamName = _settings.Param_LineId;
             string controllerParamName = _settings.Param_Controller;
             string trimmedLineName = _activeLineName.Trim();
-            string trimmedControllerName = _controllerName?.Trim();
+            string pName = _panelName?.Trim() ?? string.Empty;
+            string cName = _controllerName?.Trim() ?? string.Empty;
+            string mName = _controllerModelName?.Trim() ?? string.Empty;
+            string combinedControllerString = $"{pName} - {cName} - {mName}".Trim(' ', '-');
 
             double addedLoad = 0;
             int addedAddr = 0;
@@ -147,7 +162,7 @@ namespace Dali.Services.Revit
 
                     // Compare names
                     if (elemLineName == trimmedLineName && 
-                        (string.IsNullOrWhiteSpace(trimmedControllerName) || elemCtrlName == trimmedControllerName))
+                        (string.IsNullOrWhiteSpace(combinedControllerString) || elemCtrlName == combinedControllerString))
                     {
                         // Already on this line
                         trans.RollBack();
@@ -167,12 +182,12 @@ namespace Dali.Services.Revit
                     }
 
                     // Write Controller
-                    if (!string.IsNullOrWhiteSpace(controllerParamName) && !string.IsNullOrWhiteSpace(trimmedControllerName))
+                    if (!string.IsNullOrWhiteSpace(controllerParamName) && !string.IsNullOrWhiteSpace(combinedControllerString))
                     {
                         Parameter ctrlParam = element.LookupParameter(controllerParamName);
                         if (ctrlParam != null && !ctrlParam.IsReadOnly)
                         {
-                            ctrlParam.Set(trimmedControllerName);
+                            ctrlParam.Set(combinedControllerString);
                         }
                     }
 
@@ -207,8 +222,13 @@ namespace Dali.Services.Revit
             {
                 using (var t = new Transaction(doc, "DALI: Ensure Highlight"))
                 {
+                    string pName = _panelName?.Trim() ?? string.Empty;
+                    string cName = _controllerName?.Trim() ?? string.Empty;
+                    string mName = _controllerModelName?.Trim() ?? string.Empty;
+                    string combinedControllerString = $"{pName} - {cName} - {mName}".Trim(' ', '-');
+
                     t.Start();
-                    new ViewFilterHighlighter().ApplyLineHighlight(doc, view, _settings, _controllerName, _activeLineName, _highlightRegistry, _colorHex);
+                    new ViewFilterHighlighter().ApplyLineHighlight(doc, view, _settings, combinedControllerString, _activeLineName, _highlightRegistry, _colorHex);
                     t.Commit();
                 }
             }

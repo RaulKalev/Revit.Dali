@@ -990,6 +990,7 @@
                                             <ContentPresenter Grid.Column="0"
                                                               Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType=ComboBox}}"
                                                               ContentTemplate="{Binding SelectionBoxItemTemplate, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                              ContentTemplateSelector="{Binding ItemTemplateSelector, RelativeSource={RelativeSource AncestorType=ComboBox}}"
                                                               Margin="8,4"
                                                               VerticalAlignment="Center"
                                                               HorizontalAlignment="Left"

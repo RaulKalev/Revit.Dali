@@ -21,6 +21,8 @@ namespace Dali.Services.Revit
     public class AddToLineRequest : IExternalEventRequest
     {
         private readonly SettingsModel _settings;
+        private readonly string _panelName;
+        private readonly string _controllerModelName;
         private readonly string _activeLineName;
         private readonly string _controllerName;
         private readonly double _maxLoadmA;
@@ -34,6 +36,8 @@ namespace Dali.Services.Revit
 
         public AddToLineRequest(
             SettingsModel settings,
+            string panelName,
+            string controllerModelName,
             string activeLineName,
             string controllerName,
             double maxLoadmA,
@@ -43,6 +47,8 @@ namespace Dali.Services.Revit
             string colorHex = null)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _panelName = panelName;
+            _controllerModelName = controllerModelName;
             _activeLineName = activeLineName;
             _controllerName = controllerName;
             _maxLoadmA = maxLoadmA;
@@ -100,7 +106,11 @@ namespace Dali.Services.Revit
                 string lineIdParamName = _settings.Param_LineId;
                 string controllerParamName = _settings.Param_Controller;
                 string trimmedLineName = _activeLineName.Trim();
-                string trimmedControllerName = _controllerName?.Trim();
+                
+                string pName = _panelName?.Trim() ?? string.Empty;
+                string cName = _controllerName?.Trim() ?? string.Empty;
+                string mName = _controllerModelName?.Trim() ?? string.Empty;
+                string combinedControllerString = $"{pName} - {cName} - {mName}".Trim(' ', '-');
 
                 foreach (var eid in selectedIds)
                 {
@@ -196,7 +206,7 @@ namespace Dali.Services.Revit
 
                     // Compare names (consider nulls)
                     if (elemLineName == trimmedLineName && 
-                        (string.IsNullOrWhiteSpace(trimmedControllerName) || elemCtrlName == trimmedControllerName))
+                        (string.IsNullOrWhiteSpace(combinedControllerString) || elemCtrlName == combinedControllerString))
                     {
                         result.SkippedCount++;
                         continue;
@@ -268,12 +278,12 @@ namespace Dali.Services.Revit
                             lineParam.Set(trimmedLineName);
 
                             // 2. Write Controller Name (if configured/available)
-                            if (!string.IsNullOrWhiteSpace(controllerParamName) && !string.IsNullOrWhiteSpace(trimmedControllerName))
+                            if (!string.IsNullOrWhiteSpace(controllerParamName) && !string.IsNullOrWhiteSpace(combinedControllerString))
                             {
                                 Parameter ctrlParam = element.LookupParameter(controllerParamName);
                                 if (ctrlParam != null && !ctrlParam.IsReadOnly)
                                 {
-                                    ctrlParam.Set(trimmedControllerName);
+                                    ctrlParam.Set(combinedControllerString);
                                 }
                             }
 
@@ -328,7 +338,7 @@ namespace Dali.Services.Revit
                         {
                             highlightTrans.Start();
                             var hlResult = highlighter.ApplyLineHighlight(
-                                doc, view, _settings, trimmedControllerName, trimmedLineName, _highlightRegistry, _colorHex);
+                                doc, view, _settings, combinedControllerString, trimmedLineName, _highlightRegistry, _colorHex);
                             
                             if (hlResult.Success && hlResult.ElementsOnLine != null)
                             {

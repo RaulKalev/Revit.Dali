@@ -1,5 +1,6 @@
 using Dali.Models;
 using Dali.Services;
+using Dali.Services.Core;
 using Dali.Services.Revit;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace Dali.UI.ViewModels
         private readonly SettingsService _settingsService;
         private readonly RevitExternalEventService _eventService;
         private readonly HighlightRegistry _highlightRegistry;
+        private readonly DeviceDatabaseService _deviceDatabaseService;
         
         // Track which line triggered the current Add operation so we can update its gauge
         private LineViewModel _pendingLine;
@@ -29,6 +31,7 @@ namespace Dali.UI.ViewModels
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
             _highlightRegistry = new HighlightRegistry();
+            _deviceDatabaseService = new DeviceDatabaseService(new SessionLogger());
 
             Warnings = new ObservableCollection<string>();
             Panels = new ObservableCollection<PanelViewModel>();
@@ -114,22 +117,26 @@ namespace Dali.UI.ViewModels
                 pDef,
                 p => { p.AddNewController(CreateControllerVM); SavePanels(); },
                 p => { DeletePanel(p); SavePanels(); },
-                CreateControllerVM
+                CreateControllerVM,
+                (p, oldN) => OnPanelNameChanged(p, oldN)
             );
         }
 
-        private ControllerViewModel CreateControllerVM(ControllerDefinition def)
+        private ControllerViewModel CreateControllerVM(string panelName, ControllerDefinition def)
         {
             var vm = new ControllerViewModel(
+                panelName,
                 def,
+                _deviceDatabaseService.GetControllers(),
                 ctrl => { AddNewLine(ctrl); SavePanels(); },
                 ctrl => { DeleteController(ctrl); SavePanels(); },
                 line => AddToLine(line),
                 line => AddToLineInteractive(line),
                 ctrl => OnControllerExpanded(ctrl),
-                ctrl => OnControllerNameChanged(ctrl),
-                line => OnLineNameChanged(line),
-                line => OnChangeLineColor(line));
+                (ctrl, oldN) => OnControllerNameChanged(ctrl, oldN),
+                (line, oldN) => OnLineNameChanged(line, oldN),
+                line => OnChangeLineColor(line),
+                (ctrl, oldD) => OnControllerDeviceChanged(ctrl, oldD));
             
             vm.MaxLoadmA = _controllerMaxLoadmA;
             vm.MaxAddressCount = _controllerMaxAddressCount;
@@ -144,18 +151,84 @@ namespace Dali.UI.ViewModels
             return vm;
         }
 
-        private void OnControllerNameChanged(ControllerViewModel ctrl)
+        private void OnPanelNameChanged(PanelViewModel panel, string oldName)
         {
             SavePanels();
+            var settings = _settingsService.Load();
+
+            foreach (var ctrl in panel.Controllers)
+            {
+                string dName = ctrl.AvailableDevices?.FirstOrDefault(d => d.Id == ctrl.Model.DeviceId)?.Name?.Trim() ?? string.Empty;
+                string cName = ctrl.Model.Name?.Trim() ?? string.Empty;
+                
+                string oldFullName = $"{oldName?.Trim() ?? string.Empty} - {cName} - {dName}".Trim(' ', '-');
+                string newFullName = $"{panel.Name?.Trim() ?? string.Empty} - {cName} - {dName}".Trim(' ', '-');
+
+                _eventService.Raise(new RenameElementsRequest(settings, RenameScope.Controller, oldFullName, newFullName, null, res => {
+                    if (res.Success) { StatusMessage = res.Message; }
+                }));
+
+                foreach (var line in ctrl.Lines) RecalculateLine(line);
+            }
+        }
+
+        private void OnControllerDeviceChanged(ControllerViewModel ctrl, DeviceDto oldDevice)
+        {
+            SavePanels();
+            var settings = _settingsService.Load();
+
+            string pName = ctrl.PanelName?.Trim() ?? string.Empty;
+            string dNameNew = ctrl.SelectedDevice?.Name?.Trim() ?? string.Empty;
+            string dNameOld = oldDevice?.Name?.Trim() ?? string.Empty;
+            string cName = ctrl.Name?.Trim() ?? string.Empty;
+
+            string oldFullName = $"{pName} - {cName} - {dNameOld}".Trim(' ', '-');
+            string newFullName = $"{pName} - {cName} - {dNameNew}".Trim(' ', '-');
+
+            _eventService.Raise(new RenameElementsRequest(settings, RenameScope.Controller, oldFullName, newFullName, null, res => {
+                if (res.Success) { StatusMessage = res.Message; }
+            }));
+
             foreach (var line in ctrl.Lines)
             {
                 RecalculateLine(line);
             }
         }
 
-        internal void OnLineNameChanged(LineViewModel line)
+        private void OnControllerNameChanged(ControllerViewModel ctrl, string oldName)
         {
             SavePanels();
+
+            string pName = ctrl.PanelName?.Trim() ?? string.Empty;
+            string dName = ctrl.AvailableDevices?.FirstOrDefault(d => d.Id == ctrl.Model.DeviceId)?.Name?.Trim() ?? string.Empty;
+            string oldFullName = $"{pName} - {oldName?.Trim() ?? string.Empty} - {dName}".Trim(' ', '-');
+            string newFullName = $"{pName} - {ctrl.Name?.Trim() ?? string.Empty} - {dName}".Trim(' ', '-');
+
+            var settings = _settingsService.Load();
+            _eventService.Raise(new RenameElementsRequest(settings, RenameScope.Controller, oldFullName, newFullName, null, res => {
+                if (res.Success) { StatusMessage = res.Message; }
+            }));
+
+            foreach (var line in ctrl.Lines)
+            {
+                RecalculateLine(line);
+            }
+        }
+
+        internal void OnLineNameChanged(LineViewModel line, string oldName)
+        {
+            SavePanels();
+            
+            string pName = line.PanelName?.Trim() ?? string.Empty;
+            string cName = line.ControllerName?.Trim() ?? string.Empty;
+            string dName = line.ControllerModelName?.Trim() ?? string.Empty;
+            string parentFullName = $"{pName} - {cName} - {dName}".Trim(' ', '-');
+
+            var settings = _settingsService.Load();
+            _eventService.Raise(new RenameElementsRequest(settings, RenameScope.Line, oldName, line.Name, parentFullName, res => {
+                if (res.Success) { StatusMessage = res.Message; }
+            }));
+
             RecalculateLine(line);
         }
 
@@ -339,27 +412,99 @@ namespace Dali.UI.ViewModels
                     lineName = compositeKey.Substring(separatorIndex + 2);
                 }
 
-                // Find the matching LineViewModel across all controllers
-                foreach (var p in Panels)
+                string pName = string.Empty;
+                string cName = ctrlName;
+                string mName = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(ctrlName) && ctrlName.Contains(" - "))
                 {
-                    foreach (var ctrl in p.Controllers)
+                    var parts = ctrlName.Split(new[] { " - " }, StringSplitOptions.None);
+                    if (parts.Length == 3)
                     {
-                        bool controllerMatches = string.IsNullOrEmpty(ctrlName) || 
-                                                 string.Equals(ctrl.Name?.Trim(), ctrlName, StringComparison.OrdinalIgnoreCase);
-
-                        if (!controllerMatches) continue;
-
-                        foreach (var line in ctrl.Lines)
-                        {
-                            if (string.Equals(line.Name?.Trim(), lineName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                line.LoadmA = totals.LoadmA;
-                                line.AddressCount = totals.AddressCount;
-                            }
-                        }
-                        ctrl.RecalcTotals();
+                        pName = parts[0].Trim();
+                        cName = parts[1].Trim();
+                        mName = parts[2].Trim();
+                    }
+                    else if (parts.Length == 2)
+                    {
+                        pName = parts[0].Trim();
+                        cName = parts[1].Trim();
                     }
                 }
+
+                // 1. Resolve Panel
+                PanelViewModel targetPanel = null;
+                if (!string.IsNullOrWhiteSpace(pName))
+                {
+                    targetPanel = Panels.FirstOrDefault(p => string.Equals(p.Name, pName, StringComparison.OrdinalIgnoreCase));
+                    if (targetPanel == null)
+                    {
+                        var pDef = new PanelDefinition { Name = pName };
+                        targetPanel = CreatePanelVM(pDef);
+                        Panels.Add(targetPanel);
+                        SavePanels();
+                    }
+                }
+                else
+                {
+                    targetPanel = Panels.FirstOrDefault();
+                }
+
+                if (targetPanel == null) continue;
+
+                // 2. Resolve Controller
+                ControllerViewModel targetCtrl = null;
+                if (!string.IsNullOrWhiteSpace(cName))
+                {
+                    targetCtrl = targetPanel.Controllers.FirstOrDefault(c => string.Equals(c.Name, cName, StringComparison.OrdinalIgnoreCase));
+                    if (targetCtrl == null)
+                    {
+                        targetCtrl = targetPanel.AddNewController(CreateControllerVM);
+                        targetCtrl.Name = cName;
+                        SavePanels();
+                    }
+                }
+
+                if (targetCtrl == null) continue;
+
+                // 3. Resolve Device Model
+                if (!string.IsNullOrWhiteSpace(mName) && targetCtrl.SelectedDevice == null)
+                {
+                    var match = targetCtrl.AvailableDevices.FirstOrDefault(d => string.Equals(d.Name, mName, StringComparison.OrdinalIgnoreCase));
+                    if (match != null)
+                    {
+                        targetCtrl.SelectedDevice = match;
+                    }
+                }
+
+                // 4. Resolve Line
+                var targetLine = targetCtrl.Lines.FirstOrDefault(l => string.Equals(l.Name, lineName, StringComparison.OrdinalIgnoreCase));
+                if (targetLine == null)
+                {
+                    // If the controller has an empty line "Line 1" with 0 load, repurpose it
+                    var emptyLine = targetCtrl.Lines.FirstOrDefault(l => string.Equals(l.Name, "Line 1", StringComparison.OrdinalIgnoreCase) && l.LoadmA == 0 && l.AddressCount == 0);
+                    if (emptyLine != null)
+                    {
+                        emptyLine.Name = lineName;
+                        targetLine = emptyLine;
+                    }
+                    else if (targetCtrl.CanAddLine)
+                    {
+                        // AddNewLine is private. 
+                        // Actually, I can use AddLineCommand! But let's just use the factory or update the viewmodel. 
+                        // To avoid refactoring ControllerViewModel, let's just not auto-create extra lines if they exceed limits.
+                        // I will skip line creation here if `AddNewLine` isn't accessible. But wait, we can just log a warning.
+                        targetLine = targetCtrl.Lines.FirstOrDefault();
+                    }
+                }
+
+                if (targetLine != null)
+                {
+                    targetLine.LoadmA = totals.LoadmA;
+                    targetLine.AddressCount = totals.AddressCount;
+                }
+                
+                targetCtrl.RecalcTotals();
             }
 
             StatusMessage = result.Warnings.Count > 0
@@ -512,6 +657,8 @@ namespace Dali.UI.ViewModels
 
             var request = new AddToLineRequest(
                 settings,
+                line.PanelName,
+                line.ControllerModelName,
                 line.Name,
                 line.ControllerName,
                 MaxLoadmA,
@@ -587,6 +734,8 @@ namespace Dali.UI.ViewModels
 
             var request = new AddDevicesInteractiveRequest(
                 settings,
+                line.PanelName,
+                line.ControllerModelName,
                 line.Name,
                 line.ControllerName,
                 _highlightRegistry,

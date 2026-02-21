@@ -9,7 +9,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <NoWarn>CA1416</NoWarn>
+    <NoWarn>CA1416;CS0618</NoWarn>
+    <MSBuildWarningsAsMessages>MSB3246</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
 

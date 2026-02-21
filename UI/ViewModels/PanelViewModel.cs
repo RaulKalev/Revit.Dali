@@ -10,23 +10,26 @@ namespace Dali.UI.ViewModels
         private readonly PanelDefinition _model;
         private readonly Action<PanelViewModel> _addControllerAction;
         private readonly Action<PanelViewModel> _deleteAction;
+        private readonly Action<PanelViewModel, string> _onNameChanged;
 
         public PanelViewModel(
             PanelDefinition model,
             Action<PanelViewModel> addControllerAction,
             Action<PanelViewModel> deleteAction,
-            Func<ControllerDefinition, ControllerViewModel> createControllerVM)
+            Func<string, ControllerDefinition, ControllerViewModel> createControllerVM,
+            Action<PanelViewModel, string> onNameChanged = null)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _addControllerAction = addControllerAction;
             _deleteAction = deleteAction;
+            _onNameChanged = onNameChanged;
 
             Controllers = new ObservableCollection<ControllerViewModel>();
             if (model.Controllers != null)
             {
                 foreach (var ctrlDef in model.Controllers)
                 {
-                    Controllers.Add(createControllerVM(ctrlDef));
+                    Controllers.Add(createControllerVM(_model.Name, ctrlDef));
                 }
             }
 
@@ -45,9 +48,13 @@ namespace Dali.UI.ViewModels
             {
                 if (_model.Name != value)
                 {
+                    string oldName = _model.Name;
                     _model.Name = value;
                     OnPropertyChanged();
-                    // Optional: trigger name changed callback for saving if needed
+                    
+                    foreach (var ctrl in Controllers) ctrl.PanelName = value;
+                    
+                    _onNameChanged?.Invoke(this, oldName);
                 }
             }
         }
@@ -65,13 +72,13 @@ namespace Dali.UI.ViewModels
         public ICommand AddControllerCommand { get; }
         public ICommand DeleteCommand { get; }
 
-        public ControllerViewModel AddNewController(Func<ControllerDefinition, ControllerViewModel> createControllerVM)
+        public ControllerViewModel AddNewController(Func<string, ControllerDefinition, ControllerViewModel> createControllerVM)
         {
             var def = new ControllerDefinition { Name = $"Controller {Controllers.Count + 1}" };
             def.Lines.Add(new LineDefinition { Name = "Line 1", ControllerName = def.Name });
             
             _model.Controllers.Add(def);
-            var vm = createControllerVM(def);
+            var vm = createControllerVM(_model.Name, def);
             Controllers.Add(vm);
             
             return vm;
