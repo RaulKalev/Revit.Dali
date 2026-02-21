@@ -514,7 +514,7 @@
             </Button>
             <Button Command="{Binding ResetOverridesCommand}"
                     Style="{DynamicResource CustomActionButtonStyle}"
-                    Height="32" Padding="12,0" Margin="0"
+                    Height="32" Padding="12,0" Margin="0,0,-4,0"
                     ToolTip="Clear DALI view filter overrides">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="EraserVariant" Width="16" Height="16"

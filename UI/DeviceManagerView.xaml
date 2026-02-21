@@ -207,7 +207,7 @@
                                 
                                 <TextBlock Text="* Unsaved Changes" Foreground="Gold" FontStyle="Italic" VerticalAlignment="Center" Margin="0,0,10,0"
                                            Visibility="{Binding HasChanges, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <Button Content="Save Changes" Command="{Binding SaveDeviceCommand}" Style="{DynamicResource CustomActionButtonStyle}" Height="35" Width="120" FontSize="13" />
+                                <Button Content="Save Changes" Command="{Binding SaveDeviceCommand}" Style="{DynamicResource CustomActionButtonStyle}" Height="35" Width="120" FontSize="13" Margin="0,0,-4,0"/>
                             </StackPanel>
                         </StackPanel>
 
