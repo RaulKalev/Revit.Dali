@@ -41,6 +41,7 @@ namespace Dali.UI
         public ViewModels.SettingsViewModel SettingsVM { get; private set; }
         public ViewModels.BatchSetupViewModel BatchSetupVM { get; private set; }
         public ViewModels.GroupingViewModel GroupingVM { get; private set; }
+        public ViewModels.DeviceManagerViewModel DeviceManagerVM { get; private set; }
 
         #endregion
 
@@ -63,6 +64,10 @@ namespace Dali.UI
             // Wire up Grouping ViewModel
             GroupingVM = new ViewModels.GroupingViewModel(_settingsService, _externalEventService);
             GroupingViewControl.DataContext = GroupingVM;
+
+            // Wire up Device Manager ViewModel
+            DeviceManagerVM = new ViewModels.DeviceManagerViewModel(new Services.Core.DeviceDatabaseService(new Services.Core.SessionLogger()));
+            DeviceManagerViewControl.DataContext = DeviceManagerVM;
 
             DataContext = this;
 

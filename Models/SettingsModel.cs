@@ -21,11 +21,7 @@ namespace Dali.Models
         public string Param_LineId { get; set; } = "Dali siin";
         public string Param_Controller { get; set; } = "Dali kontroller";
 
-        // 3. DALI Limits
-        public double ControllerMaxLoadmA { get; set; } = 250.0;
-        public int ControllerMaxAddressCount { get; set; } = 64;
-        public double LineMaxLoadmA { get; set; } = 250.0;
-        public int LineMaxAddressCount { get; set; } = 64;
+        // 3. DALI Limits (Deprecated in Phase 6 - Controlled by devices.json)
 
         // 4. Persistence
         // DEPRECATED: Old flat list (kept for migration)

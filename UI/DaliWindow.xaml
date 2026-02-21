@@ -192,6 +192,10 @@
                     <TabItem x:Name="BatchSetupTab" Header="Batch Setup">
                         <ui:BatchSetupView x:Name="BatchSetupViewControl" Margin="0,5,0,0"/>
                     </TabItem>
+                    <!-- Tab 3: Devices -->
+                    <TabItem x:Name="DevicesTab" Header="Devices">
+                        <ui:DeviceManagerView x:Name="DeviceManagerViewControl" Margin="0,5,0,0"/>
+                    </TabItem>
                 </TabControl>
 
             </Grid>

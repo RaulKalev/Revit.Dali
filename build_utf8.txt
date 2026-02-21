@@ -1,0 +1,155 @@
+Build started 21.02.2026 13:00:40.
+     1>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" on node 1 (Restore target(s)).
+     1>ValidateSolutionConfiguration:
+         Building solution configuration "Debug|Any CPU".
+       _GetAllRestoreProjectPathItems:
+         Determining projects to restore...
+     1>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" (1) is building "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:9) on node 1 (_GenerateProjectRestoreGraph target(s)).
+   2:9>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:9) is building "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:12) on node 1 (_GenerateProjectRestoreGraphPerFramework target(s)).
+     2>AddPrunePackageReferences:
+         Loaded prune package data from framework packages
+     2>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (_GenerateProjectRestoreGraphPerFramework target(s)).
+   2:9>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:9) is building "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:13) on node 1 (_GenerateProjectRestoreGraphPerFramework target(s)).
+     2>AddPrunePackageReferences:
+         Loaded prune package data from framework packages
+         Loaded prune package data from framework packages
+     2>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (_GenerateProjectRestoreGraphPerFramework target(s)).
+     2>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (_GenerateProjectRestoreGraph target(s)).
+     1>Restore:
+         X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+         X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+         Assets file has not changed. Skipping assets file writing. Path: c:\Users\mibil\Documents\AntigravityGit\Dali\obj\project.assets.json
+         Restored c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj (in 55 ms).
+         
+         NuGet Config files used:
+             C:\Users\mibil\AppData\Roaming\NuGet\NuGet.Config
+             C:\Program Files (x86)\NuGet\Config\Microsoft.VisualStudio.FallbackLocation.config
+             C:\Program Files (x86)\NuGet\Config\Microsoft.VisualStudio.Offline.config
+         
+         Feeds used:
+             https://api.nuget.org/v3/index.json
+             C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+             C:\Program Files\dotnet\library-packs
+         All projects are up-to-date for restore.
+     1>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" (Restore target(s)).
+   1:2>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" on node 1 (default targets).
+     1>ValidateSolutionConfiguration:
+         Building solution configuration "Debug|Any CPU".
+   1:2>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" (1:2) is building "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:14) on node 1 (default targets).
+  2:14>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:14) is building "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:15) on node 2 (Build target(s)).
+     2>ResolveAssemblyReferences:
+         Primary reference "RevitAPILink".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitAPILink.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitAPIUILink".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitAPIUILink.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitDB".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitDB.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitDBCore".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitDBCore.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitMFC".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitMFC.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitMaterialUI3".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitMaterialUI3.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitUI".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2026.0.0.9999\ref\net8.0\RevitUI.dll".
+             Reference found at search path location "{HintPathFromItem}".
+       MainResourcesGeneration:
+       Skipping target "MainResourcesGeneration" because all output files are up-to-date with respect to the input files.
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Debug\net8.0-windows\Dali.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       GenerateBuildDependencyFile:
+       Skipping target "GenerateBuildDependencyFile" because all output files are up-to-date with respect to the input files.
+       CopyFilesToOutputDirectory:
+         Dali -> c:\Users\mibil\Documents\AntigravityGit\Dali\bin\Debug\net8.0-windows\Dali.dll
+     2>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (Build target(s)).
+  2:14>Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:14) is building "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (2:16) on node 1 (Build target(s)).
+     2>ResolveAssemblyReferences:
+         Primary reference "RevitAPILink".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitAPILink.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitAPIUILink".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitAPIUILink.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitDB".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitDB.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitDBCore".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitDBCore.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitMFC".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitMFC.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitMaterialUI3".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitMaterialUI3.dll".
+             Reference found at search path location "{HintPathFromItem}".
+         Primary reference "RevitUI".
+     2>C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+             Resolved file path is "C:\Users\mibil\.nuget\packages\autodesk.revit.sdk\2024.1.10.25\ref\net48\RevitUI.dll".
+             Reference found at search path location "{HintPathFromItem}".
+       MainResourcesGeneration:
+       Skipping target "MainResourcesGeneration" because all output files are up-to-date with respect to the input files.
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Debug\net48\Dali.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       CopyFilesToOutputDirectory:
+         Dali -> c:\Users\mibil\Documents\AntigravityGit\Dali\bin\Debug\net48\Dali.dll
+     2>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (Build target(s)).
+     2>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (default targets).
+     1>Done Building Project "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" (default targets).
+
+Build succeeded.
+
+       "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" (default target) (1:2) ->
+       "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (default target) (2:14) ->
+       "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (Build target) (2:15) ->
+       (ResolveAssemblyReferences target) -> 
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net8.0-windows]
+
+
+       "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.sln" (default target) (1:2) ->
+       "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (default target) (2:14) ->
+       "c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj" (Build target) (2:16) ->
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+         C:\Program Files\dotnet\sdk\10.0.103\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. PE image does not have metadata. PE image does not have metadata. [c:\Users\mibil\Documents\AntigravityGit\Dali\Dali.csproj::TargetFramework=net48]
+
+    14 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.31

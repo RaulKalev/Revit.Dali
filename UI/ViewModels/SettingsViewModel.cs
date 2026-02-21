@@ -84,63 +84,7 @@ namespace Dali.UI.ViewModels
             }
         }
 
-        // --- Numeric limit helpers (TextBox can't bind directly to double/int without a converter) ---
-
-        // --- Numeric limit helpers (TextBox can't bind directly to double/int without a converter) ---
-
-        // Controller Limits
-        public string ControllerMaxLoadmA_Text
-        {
-            get => Settings.ControllerMaxLoadmA.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            set
-            {
-                if (double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsed) && parsed > 0)
-                {
-                    Settings.ControllerMaxLoadmA = parsed;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string ControllerMaxAddressCount_Text
-        {
-            get => Settings.ControllerMaxAddressCount.ToString();
-            set
-            {
-                if (int.TryParse(value, out int parsed) && parsed > 0)
-                {
-                    Settings.ControllerMaxAddressCount = parsed;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        // Line Limits
-        public string LineMaxLoadmA_Text
-        {
-            get => Settings.LineMaxLoadmA.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            set
-            {
-                if (double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsed) && parsed > 0)
-                {
-                    Settings.LineMaxLoadmA = parsed;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string LineMaxAddressCount_Text
-        {
-            get => Settings.LineMaxAddressCount.ToString();
-            set
-            {
-                if (int.TryParse(value, out int parsed) && parsed > 0)
-                {
-                    Settings.LineMaxAddressCount = parsed;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        // (Numeric limit helpers deprecated in Phase 6 - Controlled by devices.json)
 
         public ICommand LoadSettingsCommand { get; }
         public ICommand SaveSettingsCommand { get; }
@@ -184,10 +128,6 @@ namespace Dali.UI.ViewModels
             OnPropertyChanged(nameof(IsLightingFixturesSelected));
             OnPropertyChanged(nameof(IsElectricalFixturesSelected));
             OnPropertyChanged(nameof(IsLightingDevicesSelected));
-            OnPropertyChanged(nameof(ControllerMaxLoadmA_Text));
-            OnPropertyChanged(nameof(ControllerMaxAddressCount_Text));
-            OnPropertyChanged(nameof(LineMaxLoadmA_Text));
-            OnPropertyChanged(nameof(LineMaxAddressCount_Text));
         }
     }
 }

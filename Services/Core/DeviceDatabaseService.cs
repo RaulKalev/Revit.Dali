@@ -180,5 +180,75 @@ namespace Dali.Services.Core
 
             return _database.Devices.Where(d => string.Equals(d.Type, "controller", StringComparison.OrdinalIgnoreCase));
         }
+
+        public void SaveDatabase()
+        {
+            try
+            {
+                if (!Directory.Exists(AppDataFolder))
+                {
+                    Directory.CreateDirectory(AppDataFolder);
+                }
+
+                string json = JsonConvert.SerializeObject(_database, Formatting.Indented);
+                File.WriteAllText(DbFilePath, json);
+                _logger.Info($"Successfully saved devices.json");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to save devices.json: {ex.Message}");
+                throw;
+            }
+        }
+
+        public void AddDevice(DeviceDto device)
+        {
+            if (_database?.Devices == null) return;
+            
+            // Generate basic ID if missing
+            if (string.IsNullOrWhiteSpace(device.Id))
+            {
+                device.Id = $"{_database.Manufacturer?.ToLower() ?? "custom"}-{Guid.NewGuid().ToString().Substring(0, 4)}";
+            }
+            
+            _database.Devices.Add(device);
+            SaveDatabase();
+        }
+
+        public void UpdateDevice(DeviceDto modifiedDevice)
+        {
+            if (_database?.Devices == null) return;
+
+            var existing = _database.Devices.FirstOrDefault(d => d.Id == modifiedDevice.Id);
+            if (existing != null)
+            {
+                // Note: Not modifying ID
+                existing.Type = modifiedDevice.Type;
+                existing.Model = modifiedDevice.Model;
+                existing.Name = modifiedDevice.Name;
+                existing.DaliLines = modifiedDevice.DaliLines;
+                existing.MaxAddressesPerLine = modifiedDevice.MaxAddressesPerLine;
+                existing.RatedCurrentmAPerLine = modifiedDevice.RatedCurrentmAPerLine;
+                existing.GuaranteedCurrentmAPerLine = modifiedDevice.GuaranteedCurrentmAPerLine;
+                existing.AddsCurrentmA = modifiedDevice.AddsCurrentmA;
+                existing.AddsAddresses = modifiedDevice.AddsAddresses;
+                existing.ExtendsLineLengthMetersTo = modifiedDevice.ExtendsLineLengthMetersTo;
+                existing.Scope = modifiedDevice.Scope;
+
+                SaveDatabase();
+            }
+        }
+
+        public void DeleteDevice(string deviceId)
+        {
+            if (_database?.Devices == null) return;
+
+            var existing = _database.Devices.FirstOrDefault(d => d.Id == deviceId);
+            if (existing != null)
+            {
+                _database.Devices.Remove(existing);
+                SaveDatabase();
+            }
+        }
     }
 }

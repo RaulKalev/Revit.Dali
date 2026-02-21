@@ -64,12 +64,6 @@ namespace Dali.UI.ViewModels
             var settings = _settingsService.Load();
             Panels.Clear();
 
-            // Apply global limits from settings
-            _controllerMaxLoadmA = settings.ControllerMaxLoadmA > 0 ? settings.ControllerMaxLoadmA : 250.0;
-            _controllerMaxAddressCount = settings.ControllerMaxAddressCount > 0 ? settings.ControllerMaxAddressCount : 64;
-            _lineMaxLoadmA = settings.LineMaxLoadmA > 0 ? settings.LineMaxLoadmA : 250.0;
-            _lineMaxAddressCount = settings.LineMaxAddressCount > 0 ? settings.LineMaxAddressCount : 64;
-
             if (settings.SavedPanels != null && settings.SavedPanels.Count > 0)
             {
                 foreach (var panelDef in settings.SavedPanels)
@@ -85,21 +79,6 @@ namespace Dali.UI.ViewModels
                 
                 Panels.Add(CreatePanelVM(pDef));
                 SavePanels();
-            }
-
-            // Propagate limits to all controllers
-            foreach (var p in Panels)
-            {
-                foreach (var c in p.Controllers)
-                {
-                    c.MaxLoadmA = _controllerMaxLoadmA;
-                    c.MaxAddressCount = _controllerMaxAddressCount;
-                    foreach (var line in c.Lines)
-                    {
-                        line.MaxLoadmA = _lineMaxLoadmA;
-                        line.MaxAddressCount = _lineMaxAddressCount;
-                    }
-                }
             }
 
             // Open first panel and first controller by default
@@ -137,20 +116,6 @@ namespace Dali.UI.ViewModels
                 (line, oldN) => OnLineNameChanged(line, oldN),
                 line => OnChangeLineColor(line),
                 (ctrl, oldD) => OnControllerDeviceChanged(ctrl, oldD));
-            
-            if (vm.SelectedDevice == null)
-            {
-                vm.MaxLoadmA = _controllerMaxLoadmA;
-                vm.MaxAddressCount = _controllerMaxAddressCount;
-                
-                // Also set limits on any existing lines
-                foreach (var line in vm.Lines)
-                {
-                    line.MaxLoadmA = _lineMaxLoadmA;
-                    line.MaxAddressCount = _lineMaxAddressCount;
-                }
-            }
-
             return vm;
         }
 
@@ -363,8 +328,6 @@ namespace Dali.UI.ViewModels
         private void AddNewLine(ControllerViewModel ctrl)
         {
             var line = ctrl.AddNewLine();
-            line.MaxLoadmA = _lineMaxLoadmA;
-            line.MaxAddressCount = _lineMaxAddressCount;
         }
 
         public void SavePanels()
@@ -378,38 +341,7 @@ namespace Dali.UI.ViewModels
 
         private void OnSettingsSaved(object sender, SettingsModel settings)
         {
-            // Update local fields
-            _controllerMaxLoadmA = settings.ControllerMaxLoadmA > 0 ? settings.ControllerMaxLoadmA : 250.0;
-            _controllerMaxAddressCount = settings.ControllerMaxAddressCount > 0 ? settings.ControllerMaxAddressCount : 64;
-            _lineMaxLoadmA = settings.LineMaxLoadmA > 0 ? settings.LineMaxLoadmA : 250.0;
-            _lineMaxAddressCount = settings.LineMaxAddressCount > 0 ? settings.LineMaxAddressCount : 64;
-
-            // Notify dashboard properties changed (as they use these fields)
-            OnPropertyChanged(nameof(MaxLoadmA));
-            OnPropertyChanged(nameof(MaxAddressCount));
-            // Trigger recalculation of dashboard ratios
-            OnPropertyChanged(nameof(LoadRatio));
-            OnPropertyChanged(nameof(AddressRatio));
-            OnPropertyChanged(nameof(IsOverLoadLimit));
-            OnPropertyChanged(nameof(IsOverAddressLimit));
-
-            // Propagate to all existing controllers and lines
-            foreach (var p in Panels)
-            {
-                foreach (var c in p.Controllers)
-                {
-                    if (c.SelectedDevice == null)
-                    {
-                        c.MaxLoadmA = _controllerMaxLoadmA;
-                        c.MaxAddressCount = _controllerMaxAddressCount;
-                        foreach (var line in c.Lines)
-                        {
-                            line.MaxLoadmA = _lineMaxLoadmA;
-                            line.MaxAddressCount = _lineMaxAddressCount;
-                        }
-                    }
-                }
-            }
+            // Settings validation/refresh goes here if needed
         }
 
         // ---- Startup model scan ----
@@ -550,18 +482,6 @@ namespace Dali.UI.ViewModels
             }
         }
 
-        // ---- Limits (global, propagated to all controllers) ----
-
-        private double _controllerMaxLoadmA;
-        private int _controllerMaxAddressCount;
-        private double _lineMaxLoadmA;
-        private int _lineMaxAddressCount;
-
-        // Exposed properties for the dashboard gauges (Active Selection)
-        // We probably want to compare selection against LINE limits, as selection usually goes into a line.
-        public double MaxLoadmA => _lineMaxLoadmA;
-        public int MaxAddressCount => _lineMaxAddressCount;
-
         // ---- Selection totals (from Revit refresh) ----
 
         private double _currentLoadmA;
@@ -606,8 +526,8 @@ namespace Dali.UI.ViewModels
             set => SetProperty(ref _skippedElementCount, value);
         }
 
-        public double LoadRatio => MaxLoadmA > 0 ? CurrentLoadmA / MaxLoadmA : 0.0;
-        public double AddressRatio => MaxAddressCount > 0 ? (double)CurrentAddressCount / MaxAddressCount : 0.0;
+        public double LoadRatio => (ActiveController?.MaxLoadmA ?? 250.0) > 0 ? CurrentLoadmA / (ActiveController?.MaxLoadmA ?? 250.0) : 0.0;
+        public double AddressRatio => (ActiveController?.MaxAddressCount ?? 64) > 0 ? (double)CurrentAddressCount / (ActiveController?.MaxAddressCount ?? 64) : 0.0;
         public bool IsOverLoadLimit => LoadRatio > 1.0;
         public bool IsOverAddressLimit => AddressRatio > 1.0;
 
@@ -694,8 +614,8 @@ namespace Dali.UI.ViewModels
                 line.ControllerModelName,
                 line.Name,
                 line.ControllerName,
-                MaxLoadmA,
-                MaxAddressCount,
+                line.MaxLoadmA,
+                line.MaxAddressCount,
                 _highlightRegistry,
                 OnAddToLineComplete,
                 line.ColorHex);

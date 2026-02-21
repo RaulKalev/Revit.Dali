@@ -48,55 +48,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 3. DALI Limits -->
-                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,5,15">
-                    <StackPanel>
-                        <TextBlock Text="DALI Limits" FontWeight="SemiBold" Foreground="{DynamicResource ForegroundBrush}" Margin="0,0,0,4"/>
-                        <TextBlock Text="Applied to all controllers and lines as the maximum capacity." Foreground="Gray" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                        <!-- Header Row -->
-                        <Grid Margin="0,0,0,6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="1" Text="Max Load (mA)" Foreground="Gray" FontSize="11" HorizontalAlignment="Center"/>
-                            <TextBlock Grid.Column="3" Text="Max Addresses" Foreground="Gray" FontSize="11" HorizontalAlignment="Center"/>
-                        </Grid>
-
-                        <!-- Controller Row -->
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Controller" VerticalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
-                            <TextBox Grid.Column="1" Text="{Binding ControllerMaxLoadmA_Text, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{DynamicResource CustomTextBoxStyle}" HorizontalContentAlignment="Center"/>
-                            <TextBox Grid.Column="3" Text="{Binding ControllerMaxAddressCount_Text, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{DynamicResource CustomTextBoxStyle}" HorizontalContentAlignment="Center"/>
-                        </Grid>
-
-                        <!-- Line Row -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Line" VerticalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
-                            <TextBox Grid.Column="1" Text="{Binding LineMaxLoadmA_Text, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{DynamicResource CustomTextBoxStyle}" HorizontalContentAlignment="Center"/>
-                            <TextBox Grid.Column="3" Text="{Binding LineMaxAddressCount_Text, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{DynamicResource CustomTextBoxStyle}" HorizontalContentAlignment="Center"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                <!-- (DALI Limits section removed in Phase 6 - Controlled by DeviceManagerView) -->
 
                 <!-- 4. Validation Output -->
                 <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,5,0">
