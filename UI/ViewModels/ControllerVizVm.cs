@@ -52,6 +52,22 @@ namespace Dali.UI.ViewModels
 
         public string DeviceCountDisplay => $"{DeviceCount} / {MaxDevices}";
 
+        private double _loadRatio;
+        /// <summary>Current load as a fraction of the max (e.g. 0.75 = 75%). 0 means no data.</summary>
+        public double LoadRatio
+        {
+            get => _loadRatio;
+            set => SetProperty(ref _loadRatio, value);
+        }
+
+        private double _addressRatio;
+        /// <summary>Current address count as a fraction of the max. 0 means no data.</summary>
+        public double AddressRatio
+        {
+            get => _addressRatio;
+            set => SetProperty(ref _addressRatio, value);
+        }
+
         public ObservableCollection<DeviceGroupVizVm> Groups { get; } = new ObservableCollection<DeviceGroupVizVm>();
     }
 
@@ -69,6 +85,16 @@ namespace Dali.UI.ViewModels
 
         /// <summary>Text shown in the column header box: the line name when assigned, or "—" when the output is unused.</summary>
         public string BoxLabel => FirstLine?.LineName is string n && n.Length > 0 ? n : "\u2014";
+
+        // --- Status color relay (sourced from FirstLine ratios) ---
+        /// <summary>True when the line has any load/address data (ratio > 0).</summary>
+        public bool LineHasData => FirstLine != null && (FirstLine.LoadRatio > 0 || FirstLine.AddressRatio > 0);
+        /// <summary>True when either ratio is ≥ 80% but not yet over 100%.</summary>
+        public bool LineIsNearCapacity => LineHasData && !LineIsOverCapacity &&
+            (FirstLine.LoadRatio >= 0.8 || FirstLine.AddressRatio >= 0.8);
+        /// <summary>True when either ratio exceeds 100%.</summary>
+        public bool LineIsOverCapacity => FirstLine != null &&
+            (FirstLine.LoadRatio > 1.0 || FirstLine.AddressRatio > 1.0);
 
         /// <summary>Collection of DALI lines on this output (usually 0 or 1).</summary>
         public ObservableCollection<DaliLineVizVm> Lines { get; } = new ObservableCollection<DaliLineVizVm>();

@@ -39,7 +39,9 @@ namespace Dali.Services.Visualization
                 {
                     LineName = line.Name ?? $"Line {i + 1}",
                     DeviceCount = line.AddressCount,
-                    MaxDevices = line.MaxAddressCount > 0 ? line.MaxAddressCount : 64
+                    MaxDevices = line.MaxAddressCount > 0 ? line.MaxAddressCount : 64,
+                    LoadRatio    = line.MaxLoadmA    > 0 ? line.LoadmA    / line.MaxLoadmA    : 0,
+                    AddressRatio = line.MaxAddressCount > 0 ? line.AddressCount / (double)line.MaxAddressCount : 0
                 };
 
                 outputVm.Lines.Add(lineVm);

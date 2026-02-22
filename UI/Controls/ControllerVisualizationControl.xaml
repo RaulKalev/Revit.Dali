@@ -23,7 +23,7 @@
 
                     <!-- ====== Controller card ====== -->
                     <Border
-                        Margin="0,0,0,14"
+                        Margin="0,0,0,0"
                         Padding="12,10"
                         BorderBrush="{DynamicResource BorderBrush}"
                         BorderThickness="1"
@@ -67,11 +67,16 @@
                                 <Grid Width="116">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />  <!-- Line name box -->
-                                        <RowDefinition Height="14" />    <!-- stem box -> first node -->
                                         <RowDefinition Height="*" />     <!-- device group nodes -->
                                     </Grid.RowDefinitions>
 
-                                    <!-- Line name box (replaces OUT label) -->
+                                    <!-- Full-height stem behind everything; box background masks it -->
+                                    <Rectangle
+                                        Grid.RowSpan="2"
+                                        Width="1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Stretch"
+                                        Fill="#555555" />
                                     <Border
                                         Grid.Row="0"
                                         Padding="6,5"
@@ -89,16 +94,8 @@
                                             TextTrimming="CharacterEllipsis" />
                                     </Border>
 
-                                    <!-- Stem: box down to first node -->
-                                    <Rectangle
-                                        Grid.Row="1"
-                                        Width="1"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Stretch"
-                                        Fill="#555555" />
-
                                     <!-- Device group nodes -->
-                                    <ItemsControl Grid.Row="2" ItemsSource="{Binding FirstLine.Groups}">
+                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding FirstLine.Groups}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="{x:Type vm:DeviceGroupVizVm}">
                                                     <!--
@@ -165,7 +162,7 @@
 
                                     <!-- Placeholder when output has no line assigned -->
                                     <TextBlock
-                                        Grid.Row="2"
+                                        Grid.Row="1"
                                         HorizontalAlignment="Center"
                                         FontSize="10"
                                         FontStyle="Italic"
