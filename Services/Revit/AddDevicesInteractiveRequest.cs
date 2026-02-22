@@ -57,7 +57,7 @@ namespace Dali.Services.Revit
             var doc = uidoc.Document;
 
             // 1. Ensure view filter is active for this line (so user sees what they add)
-            ApplyMetadataHighlight(doc, app.ActiveUIDocument.ActiveView);
+            ApplyMetadataHighlight(doc, uidoc, uidoc.ActiveView);
 
             // 2. Build category filter for selection
             var includedCategoryIds = new HashSet<int>();
@@ -215,7 +215,7 @@ namespace Dali.Services.Revit
             }
         }
 
-        private void ApplyMetadataHighlight(Document doc, View view)
+        private void ApplyMetadataHighlight(Document doc, UIDocument uidoc, View view)
         {
             if (_highlightRegistry == null) return;
             try
@@ -230,19 +230,9 @@ namespace Dali.Services.Revit
                     t.Start();
                     new ViewFilterHighlighter().ApplyLineHighlight(doc, view, _settings, combinedControllerString, _activeLineName, _highlightRegistry, _colorHex);
 
-                    // Brief display-style toggle forces a full canvas repaint.
-                    try
-                    {
-                        var origStyle = view.DisplayStyle;
-                        view.DisplayStyle = origStyle == DisplayStyle.Wireframe
-                            ? DisplayStyle.ShadingWithEdges
-                            : DisplayStyle.Wireframe;
-                        view.DisplayStyle = origStyle;
-                    }
-                    catch { /* best-effort */ }
-
                     t.Commit();
                 }
+                RevitViewUtil.ForceRepaint(doc, uidoc, view);
             }
             catch (Exception ex)
             {

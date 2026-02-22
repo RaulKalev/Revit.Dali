@@ -345,19 +345,8 @@ namespace Dali.Services.Revit
                                 app.ActiveUIDocument?.Selection.SetElementIds(hlResult.ElementsOnLine);
                             }
 
-                            // Brief display-style toggle forces a full canvas repaint.
-                            try
-                            {
-                                var origStyle = view.DisplayStyle;
-                                view.DisplayStyle = origStyle == DisplayStyle.Wireframe
-                                    ? DisplayStyle.ShadingWithEdges
-                                    : DisplayStyle.Wireframe;
-                                view.DisplayStyle = origStyle;
-                            }
-                            catch { /* best-effort */ }
-
                             highlightTrans.Commit();
-                            app.ActiveUIDocument?.RefreshActiveView();
+                            RevitViewUtil.ForceRepaint(doc, app.ActiveUIDocument, view);
 
                             if (hlResult.Success)
                             {
