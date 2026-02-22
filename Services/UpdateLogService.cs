@@ -9,9 +9,9 @@ namespace Dali.Services
 {
     public class UpdateLogService
     {
-        private const string AppName = "ProSchedules";
+        private const string AppName = "Dali";
         private const string StateFileName = "state.json";
-        private const string RelativeChangelogPath = "ProSchedules/changelog.json"; // Default relative path
+        private const string RelativeChangelogPath = "Dali/changelog.json"; // Default relative path
 
         public class Changelog
         {
@@ -108,7 +108,7 @@ namespace Dali.Services
             // string debugLog = "";
 
             // 1. Env Variable
-            string envPath = Environment.GetEnvironmentVariable("PROSCHEDULES_CHANGELOG_PATH");
+            string envPath = Environment.GetEnvironmentVariable("DALI_CHANGELOG_PATH");
             if (!string.IsNullOrEmpty(envPath) && File.Exists(envPath))
             {
                 path = envPath;
@@ -144,7 +144,7 @@ namespace Dali.Services
                     }
 
                     // Specific EULE Team path
-                    string eulePath = Path.Combine(rootPath, "0_EULE  Team folder (kogu kollektiiv)", "02_EULE REVIT TEMPLATE", "099-scriptid", "Pluginad", "UuendusteInfo", "ProSchedule_CHANGELOG.json");
+                    string eulePath = Path.Combine(rootPath, "0_EULE  Team folder (kogu kollektiiv)", "02_EULE REVIT TEMPLATE", "099-scriptid", "Pluginad", "UuendusteInfo", "Dali_CHANGELOG.json");
                     // debugLog += $"  Checking specific EULE path: {eulePath} (Exists: {File.Exists(eulePath)})\n";
 
                     if (File.Exists(eulePath))
@@ -154,7 +154,7 @@ namespace Dali.Services
                     }
                     
                     // Also check for "MyTeam/Scripts/App_CHANGELOG.json"
-                    string customPath = Path.Combine(rootPath, "MyTeam", "Scripts", "ProSchedules_CHANGELOG.json");
+                    string customPath = Path.Combine(rootPath, "MyTeam", "Scripts", "Dali_CHANGELOG.json");
                     if (File.Exists(customPath))
                     {
                         path = customPath;

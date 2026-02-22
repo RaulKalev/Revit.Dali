@@ -49,7 +49,7 @@ namespace Dali
             }
 
             // Create Ribbon Panel on the custom tab
-            ribbonPanel = application.CreateOrSelectPanel(tabName, "Tools");
+            ribbonPanel = application.CreateOrSelectPanel(tabName, "Valgus");
 
             // Create PushButton with embedded resource
             var duplicateSheetsButton = ribbonPanel.CreatePushButton<DaliCommand>()
