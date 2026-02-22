@@ -1,5 +1,9 @@
+using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+
+// App lives in the root Dali namespace
+using Dali;
 
 namespace Dali.Services.Revit
 {
@@ -9,12 +13,14 @@ namespace Dali.Services.Revit
     internal static class RevitViewUtil
     {
         /// <summary>
-        /// Forces a full graphical repaint of the active view by committing two
-        /// back-to-back transactions: one that changes the DisplayStyle away from
-        /// its current value, and one that restores it.  This is the programmatic
-        /// equivalent of the user toggling the canvas theme twice.
+        /// Forces a full graphical repaint of the active view.
         ///
-        /// Must be called on the Revit API thread (inside an IExternalEventRequest.Execute).
+        /// Strategy: commit TX1 (DisplayStyle → temp) inside the current Execute() call,
+        /// then let Execute() return so Revit can render the intermediate state.
+        /// A scheduled ExternalEvent fires 200 ms later to commit TX2 (restore original)
+        /// giving Revit a second render pass — this time with the filter overrides visible.
+        ///
+        /// Must be called on the Revit API thread (inside IExternalEventRequest.Execute).
         /// </summary>
         public static void ForceRepaint(Document doc, UIDocument uidoc, View view)
         {
@@ -27,28 +33,25 @@ namespace Dali.Services.Revit
                     ? DisplayStyle.ShadingWithEdges
                     : DisplayStyle.Wireframe;
 
-                // Transaction 1: change to temp style → committed change triggers redraw queue.
+                // TX1: change to temp — fires inside the current Execute() call.
                 using (var t1 = new Transaction(doc, "DALI: Repaint Step 1"))
                 {
                     t1.Start();
                     view.DisplayStyle = temp;
                     t1.Commit();
                 }
-
-                // Transaction 2: restore original style → second committed change completes the cycle.
-                using (var t2 = new Transaction(doc, "DALI: Repaint Step 2"))
-                {
-                    t2.Start();
-                    view.DisplayStyle = original;
-                    t2.Commit();
-                }
-
                 uidoc?.RefreshActiveView();
+
+                // After Execute() returns Revit will render the temp style.
+                // Schedule TX2 as a brand-new ExternalEvent so Revit has rendered
+                // before we restore — second render pass shows the filter colours.
+                var viewId = view.Id;
+                Task.Delay(200).ContinueWith(_ =>
+                    App.ExternalEventService?.Raise(
+                        new RepaintRestoreRequest(viewId, original)));
             }
             catch
             {
-                // Best-effort: some view types (schedules, sheets) don't support DisplayStyle.
-                // RefreshActiveView alone as fallback.
                 try { uidoc?.RefreshActiveView(); } catch { }
             }
         }
