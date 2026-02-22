@@ -138,7 +138,7 @@
                             HorizontalAlignment="Stretch"
                             Style="{DynamicResource CustomTextBoxStyle}"
                             ToolTip="Instance parameter used to group Lighting Fixtures and Electrical Fixtures in the visualization."
-                            Text="{Binding Settings.DeviceGroupingParamFixtures}" />
+                            Text="{Binding Settings.DeviceGroupingParamFixtures, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock
                             Margin="0,8,0,2"
                             Foreground="Gray"
@@ -147,7 +147,7 @@
                             HorizontalAlignment="Stretch"
                             Style="{DynamicResource CustomTextBoxStyle}"
                             ToolTip="Instance parameter used to group Lighting Devices in the visualization."
-                            Text="{Binding Settings.DeviceGroupingParamDevices}" />
+                            Text="{Binding Settings.DeviceGroupingParamDevices, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Border>
 

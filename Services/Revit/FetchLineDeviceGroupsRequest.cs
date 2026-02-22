@@ -99,7 +99,21 @@ namespace Dali.Services.Revit
                     string groupVal = "(Tühi)";
                     if (!string.IsNullOrWhiteSpace(paramName))
                     {
+                        // Exact-name lookup first (fast); fall back to case-insensitive scan
+                        // in case the user's setting has a different casing than the family.
                         Parameter gp = elem.LookupParameter(paramName);
+                        if (gp == null)
+                        {
+                            foreach (Parameter p in elem.Parameters)
+                            {
+                                if (string.Equals(p.Definition?.Name, paramName,
+                                        StringComparison.OrdinalIgnoreCase))
+                                {
+                                    gp = p;
+                                    break;
+                                }
+                            }
+                        }
                         if (gp != null && gp.HasValue)
                         {
                             string v = gp.StorageType == StorageType.String
