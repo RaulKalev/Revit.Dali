@@ -117,6 +117,7 @@
         <Border
             Margin="2"
             Background="{DynamicResource PrimaryBackgroundBrush}"
+            ClipToBounds="True"
             CornerRadius="10">
             <Grid x:Name="MainContentGrid" PreviewMouseDown="Window_PreviewMouseDown">
                 <Grid.RowDefinitions>
