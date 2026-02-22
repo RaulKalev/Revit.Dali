@@ -229,6 +229,18 @@ namespace Dali.Services.Revit
 
                     t.Start();
                     new ViewFilterHighlighter().ApplyLineHighlight(doc, view, _settings, combinedControllerString, _activeLineName, _highlightRegistry, _colorHex);
+
+                    // Brief display-style toggle forces a full canvas repaint.
+                    try
+                    {
+                        var origStyle = view.DisplayStyle;
+                        view.DisplayStyle = origStyle == DisplayStyle.Wireframe
+                            ? DisplayStyle.ShadingWithEdges
+                            : DisplayStyle.Wireframe;
+                        view.DisplayStyle = origStyle;
+                    }
+                    catch { /* best-effort */ }
+
                     t.Commit();
                 }
             }

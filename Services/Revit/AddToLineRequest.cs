@@ -343,10 +343,21 @@ namespace Dali.Services.Revit
                             if (hlResult.Success && hlResult.ElementsOnLine != null)
                             {
                                 app.ActiveUIDocument?.Selection.SetElementIds(hlResult.ElementsOnLine);
-                                app.ActiveUIDocument?.RefreshActiveView();
                             }
 
+                            // Brief display-style toggle forces a full canvas repaint.
+                            try
+                            {
+                                var origStyle = view.DisplayStyle;
+                                view.DisplayStyle = origStyle == DisplayStyle.Wireframe
+                                    ? DisplayStyle.ShadingWithEdges
+                                    : DisplayStyle.Wireframe;
+                                view.DisplayStyle = origStyle;
+                            }
+                            catch { /* best-effort */ }
+
                             highlightTrans.Commit();
+                            app.ActiveUIDocument?.RefreshActiveView();
 
                             if (hlResult.Success)
                             {

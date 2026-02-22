@@ -79,8 +79,23 @@ namespace Dali.Services.Revit
                         _lineName,
                         _registry,
                         _colorHex);
+
+                    // Brief display-style toggle forces Revit to repaint the canvas,
+                    // equivalent to manually toggling the canvas theme twice.
+                    try
+                    {
+                        var origStyle = view.DisplayStyle;
+                        view.DisplayStyle = origStyle == DisplayStyle.Wireframe
+                            ? DisplayStyle.ShadingWithEdges
+                            : DisplayStyle.Wireframe;
+                        view.DisplayStyle = origStyle;
+                    }
+                    catch { /* best-effort; view type may not support DisplayStyle */ }
+
                     trans.Commit();
                 }
+
+                uidoc.RefreshActiveView();
 
                 if (!highlightResult.Success || highlightResult.ElementsOnLine == null || !highlightResult.ElementsOnLine.Any())
                 {
