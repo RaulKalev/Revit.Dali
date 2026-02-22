@@ -178,7 +178,7 @@
                                     </Border>
 
                                     <!-- Device group nodes -->
-                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding FirstLine.Groups}">
+                                    <ItemsControl Grid.Row="1" HorizontalAlignment="Center" ItemsSource="{Binding FirstLine.Groups}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="{x:Type vm:DeviceGroupVizVm}">
                                                     <!--
