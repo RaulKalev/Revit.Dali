@@ -4,9 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="clr-namespace:Dali.UI"
     xmlns:vm="clr-namespace:Dali.UI.ViewModels"
     d:DesignHeight="600"
-    d:DesignWidth="480"
+    d:DesignWidth="520"
     mc:Ignorable="d">
 
     <Grid>
@@ -77,21 +78,101 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Stretch"
                                         Fill="#555555" />
+                                    <!-- Line name box with split mA / address gauge at bottom -->
                                     <Border
                                         Grid.Row="0"
-                                        Padding="6,5"
+                                        Margin="0,8,0,6"
                                         HorizontalAlignment="Center"
-                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                         BorderThickness="1"
                                         CornerRadius="3"
-                                        MinWidth="54">
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            FontSize="11"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource ForegroundBrush}"
-                                            Text="{Binding BoxLabel}"
-                                            TextTrimming="CharacterEllipsis" />
+                                        MinWidth="80">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LineHasData}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#4CAF50" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding LineIsNearCapacity}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#FFC107" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding LineIsOverCapacity}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#F44336" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <TextBlock
+                                                Margin="6,4,6,2"
+                                                HorizontalAlignment="Center"
+                                                FontSize="11"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource ForegroundBrush}"
+                                                Text="{Binding BoxLabel}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <!-- Split gauge: left half = mA load, right half = address count -->
+                                            <Grid Height="5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="1" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <!-- mA load bar (left) -->
+                                                <Grid Grid.Column="0">
+                                                    <Border Background="#2A2A2A" />
+                                                    <Border HorizontalAlignment="Left">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="#4CAF50" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding FirstLine.IsNearLoad}" Value="True">
+                                                                        <Setter Property="Background" Value="#FFC107" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FirstLine.IsOverLoad}" Value="True">
+                                                                        <Setter Property="Background" Value="#F44336" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <Border.Width>
+                                                            <MultiBinding Converter="{x:Static ui:RatioToWidthConverter.Instance}">
+                                                                <Binding Path="FirstLine.LoadRatio" />
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                                            </MultiBinding>
+                                                        </Border.Width>
+                                                    </Border>
+                                                </Grid>
+                                                <!-- Divider -->
+                                                <Rectangle Grid.Column="1" Fill="#444444" />
+                                                <!-- Address count bar (right) -->
+                                                <Grid Grid.Column="2">
+                                                    <Border Background="#2A2A2A" />
+                                                    <Border HorizontalAlignment="Left">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="#4CAF50" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding FirstLine.IsNearAddress}" Value="True">
+                                                                        <Setter Property="Background" Value="#FFC107" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FirstLine.IsOverAddress}" Value="True">
+                                                                        <Setter Property="Background" Value="#F44336" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <Border.Width>
+                                                            <MultiBinding Converter="{x:Static ui:RatioToWidthConverter.Instance}">
+                                                                <Binding Path="FirstLine.AddressRatio" />
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                                                            </MultiBinding>
+                                                        </Border.Width>
+                                                    </Border>
+                                                </Grid>
+                                            </Grid>
+                                        </StackPanel>
                                     </Border>
 
                                     <!-- Device group nodes -->

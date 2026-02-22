@@ -57,7 +57,7 @@ namespace Dali.UI.ViewModels
         public double LoadRatio
         {
             get => _loadRatio;
-            set => SetProperty(ref _loadRatio, value);
+            set { SetProperty(ref _loadRatio, value); OnPropertyChanged(nameof(IsNearLoad)); OnPropertyChanged(nameof(IsOverLoad)); }
         }
 
         private double _addressRatio;
@@ -65,8 +65,13 @@ namespace Dali.UI.ViewModels
         public double AddressRatio
         {
             get => _addressRatio;
-            set => SetProperty(ref _addressRatio, value);
+            set { SetProperty(ref _addressRatio, value); OnPropertyChanged(nameof(IsNearAddress)); OnPropertyChanged(nameof(IsOverAddress)); }
         }
+
+        public bool IsOverLoad     => LoadRatio    > 1.0;
+        public bool IsNearLoad     => LoadRatio    >= 0.8 && LoadRatio    <= 1.0;
+        public bool IsOverAddress  => AddressRatio > 1.0;
+        public bool IsNearAddress  => AddressRatio >= 0.8 && AddressRatio <= 1.0;
 
         public ObservableCollection<DeviceGroupVizVm> Groups { get; } = new ObservableCollection<DeviceGroupVizVm>();
     }
