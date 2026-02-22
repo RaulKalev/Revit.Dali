@@ -1,5 +1,8 @@
 using Autodesk.Revit.UI;
 using Dali.Services;
+using Dali.Services.Revit;
+using Dali.Services.Visualization;
+using Dali.UI.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -44,6 +47,46 @@ namespace Dali.UI
         public ViewModels.GroupingViewModel GroupingVM { get; private set; }
         public ViewModels.DeviceManagerViewModel DeviceManagerVM { get; private set; }
 
+        // ---- Visualization panel dependency properties ----
+
+        public static readonly DependencyProperty IsVizOpenProperty = DependencyProperty.Register(
+            nameof(IsVizOpen), typeof(bool), typeof(DaliWindow),
+            new PropertyMetadata(false, OnIsVizOpenChanged));
+
+        public bool IsVizOpen
+        {
+            get => (bool)GetValue(IsVizOpenProperty);
+            set => SetValue(IsVizOpenProperty, value);
+        }
+
+        private static void OnIsVizOpenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var w = (DaliWindow)d;
+            bool open = (bool)e.NewValue;
+            w.VizPanelWidth = open ? 360.0 : 0.0;
+            if (open) w.RebuildVisualization();
+        }
+
+        public static readonly DependencyProperty VizPanelWidthProperty = DependencyProperty.Register(
+            nameof(VizPanelWidth), typeof(double), typeof(DaliWindow),
+            new PropertyMetadata(0.0));
+
+        public double VizPanelWidth
+        {
+            get => (double)GetValue(VizPanelWidthProperty);
+            set => SetValue(VizPanelWidthProperty, value);
+        }
+
+        public static readonly DependencyProperty ControllerVizProperty = DependencyProperty.Register(
+            nameof(ControllerViz), typeof(ControllerVizVm), typeof(DaliWindow),
+            new PropertyMetadata(null));
+
+        public ControllerVizVm ControllerViz
+        {
+            get => (ControllerVizVm)GetValue(ControllerVizProperty);
+            set => SetValue(ControllerVizProperty, value);
+        }
+
         #endregion
 
         public DaliWindow(UIApplication app, Services.Revit.RevitExternalEventService externalEventService, Services.SettingsService settingsService, Services.ParameterResolver parameterResolver)
@@ -70,6 +113,10 @@ namespace Dali.UI
             // Wire up Device Manager ViewModel
             DeviceManagerVM = new ViewModels.DeviceManagerViewModel(_deviceDatabaseService);
             DeviceManagerViewControl.DataContext = DeviceManagerVM;
+
+            // Subscribe for visualization updates when active controller changes
+            GroupingVM.PropertyChanged += GroupingVM_PropertyChanged;
+            _settingsService.OnSettingsSaved += SettingsService_OnSettingsSaved;
 
             DataContext = this;
 
@@ -365,5 +412,65 @@ namespace Dali.UI
         {
 
         }
+
+        #region Visualization panel
+
+        private void VizToggle_Click(object sender, RoutedEventArgs e)
+        {
+            IsVizOpen = !IsVizOpen;
+        }
+
+        private void GroupingVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(GroupingViewModel.ActiveController) && IsVizOpen)
+            {
+                RebuildVisualization();
+            }
+        }
+
+        private void SettingsService_OnSettingsSaved(object sender, Models.SettingsModel settings)
+        {
+            if (IsVizOpen)
+            {
+                RebuildVisualization();
+            }
+        }
+
+        /// <summary>
+        /// Rebuilds the ControllerVizVm from the current active controller and
+        /// triggers an async device-group fetch from Revit.
+        /// </summary>
+        private void RebuildVisualization()
+        {
+            var ctrl = GroupingVM?.ActiveController;
+            var vizVm = ControllerVisualizationBuilder.Build(ctrl);
+            ControllerViz = vizVm;
+
+            if (vizVm == null) return;
+
+            var settings = _settingsService.Load();
+            var lineInfos = new List<LineDeviceGroupInfo>();
+            foreach (var output in vizVm.Outputs)
+            {
+                foreach (var line in output.Lines)
+                {
+                    lineInfos.Add(new LineDeviceGroupInfo
+                    {
+                        LineName = line.LineName,
+                        TargetVm = line
+                    });
+                }
+            }
+
+            if (lineInfos.Count > 0)
+            {
+                _externalEventService.Raise(new FetchLineDeviceGroupsRequest(
+                    settings,
+                    settings.DeviceGroupingParameterName ?? string.Empty,
+                    lineInfos));
+            }
+        }
+
+        #endregion
     }
 }

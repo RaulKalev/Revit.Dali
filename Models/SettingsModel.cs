@@ -21,6 +21,10 @@ namespace Dali.Models
         public string Param_LineId { get; set; } = "Dali siin";
         public string Param_Controller { get; set; } = "Dali kontroller";
 
+        // 6. Visualization
+        /// <summary>Instance parameter used to group devices in the controller visualization panel.</summary>
+        public string DeviceGroupingParameterName { get; set; } = string.Empty;
+
         // 3. DALI Limits (Deprecated in Phase 6 - Controlled by devices.json)
 
         // 4. Persistence

@@ -5,6 +5,7 @@
     xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Dali"
     xmlns:ui="clr-namespace:Dali.UI"
+    xmlns:controls="clr-namespace:Dali.UI.Controls"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Dali"
@@ -122,6 +123,10 @@
                     <RowDefinition Height="30" /> <!-- Title bar -->
                     <RowDefinition Height="*" />  <!-- Content -->
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />    <!-- Main content -->
+                    <ColumnDefinition Width="Auto" /> <!-- Visualization panel (width driven by VizPanelWidth) -->
+                </Grid.ColumnDefinitions>
 
                 <!-- Title bar (Row 0) -->
                 <ui:TitleBar
@@ -130,7 +135,7 @@
                     Loaded="TitleBar_Loaded" />
         
                 <!-- Settings Button -->
-                <Button Grid.Row="0"
+                <Button Grid.Row="0" Grid.Column="0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         Margin="0,0,110,0"
@@ -139,6 +144,19 @@
                         Click="Settings_Click"
                         ToolTip="Settings">
                     <materialDesign:PackIcon Kind="Cog" Width="20" Height="20" Foreground="{DynamicResource IconBrush}"/>
+                </Button>
+
+                <!-- Visualization panel toggle -->
+                <Button Grid.Row="0" Grid.Column="0"
+                        x:Name="VizToggleButton"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,0,145,0"
+                        Width="30" Height="30"
+                        Style="{StaticResource FlatIconButton}"
+                        Click="VizToggle_Click"
+                        ToolTip="Toggle Controller Visualization">
+                    <materialDesign:PackIcon Kind="Application" Width="20" Height="20" Foreground="{DynamicResource IconBrush}"/>
                 </Button>
 
                 <!-- Theme toggle -->
@@ -178,8 +196,20 @@
                     </ToggleButton.Template>
                 </ToggleButton>
 
+                <!-- Visualization side panel (Row 0-1, Column 1) -->
+                <Border
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    Width="{Binding VizPanelWidth, RelativeSource={RelativeSource AncestorType=Window}}"
+                    ClipToBounds="True">
+                    <controls:ControllerVisualizationControl
+                        x:Name="ControllerVizControl"
+                        DataContext="{Binding ControllerViz, RelativeSource={RelativeSource AncestorType=Window}}" />
+                </Border>
+
                 <!-- Main Content (Row 1) - TabControl with Grouping + Batch Setup -->
-                <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="10,5,10,10"
+                <TabControl x:Name="MainTabControl" Grid.Row="1" Grid.Column="0" Margin="10,5,10,10"
                             Background="{DynamicResource PrimaryBackgroundBrush}"
                             BorderThickness="0"
                             Foreground="{DynamicResource ForegroundBrush}">

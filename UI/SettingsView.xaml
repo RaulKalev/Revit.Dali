@@ -117,6 +117,31 @@
                     </StackPanel>
                 </Border>
 
+                <!--  3. Visualization  -->
+                <Border
+                    Margin="0,0,5,15"
+                    Padding="10"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            Text="Controller Visualization" />
+                        <TextBlock
+                            Margin="0,0,0,2"
+                            Foreground="Gray"
+                            Text="Device Grouping Parameter (instance)" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource CustomTextBoxStyle}"
+                            ToolTip="Parameter name used to group devices on each DALI line in the visualization panel."
+                            Text="{Binding Settings.DeviceGroupingParameterName}" />
+                    </StackPanel>
+                </Border>
+
                 <!--  (DALI Limits section removed in Phase 6 - Controlled by DeviceManagerView)  -->
 
                 <!--  4. Validation Output  -->
