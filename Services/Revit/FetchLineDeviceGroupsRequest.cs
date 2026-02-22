@@ -99,14 +99,19 @@ namespace Dali.Services.Revit
                     string groupVal = "(Tühi)";
                     if (!string.IsNullOrWhiteSpace(paramName))
                     {
-                        // Exact-name lookup first (fast); fall back to case-insensitive scan
-                        // in case the user's setting has a different casing than the family.
+                        // Exact-name lookup first (fast); fall back to case-insensitive,
+                        // Unicode-normalized scan to handle composed/decomposed ä/õ/ö etc.
                         Parameter gp = elem.LookupParameter(paramName);
                         if (gp == null)
                         {
+                            string paramNorm = paramName.Normalize(System.Text.NormalizationForm.FormC);
                             foreach (Parameter p in elem.Parameters)
                             {
-                                if (string.Equals(p.Definition?.Name, paramName,
+                                string defName = p.Definition?.Name;
+                                if (defName == null) continue;
+                                if (string.Equals(
+                                        defName.Normalize(System.Text.NormalizationForm.FormC),
+                                        paramNorm,
                                         StringComparison.OrdinalIgnoreCase))
                                 {
                                     gp = p;

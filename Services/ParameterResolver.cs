@@ -132,13 +132,20 @@ namespace Dali.Services
                 var firstElement = collector.FirstElement();
                 if (firstElement == null) continue;
 
-                // Exact match first, then case-insensitive fallback (mirrors FetchLineDeviceGroupsRequest)
+                // Exact match first, then case-insensitive + Unicode-normalized fallback
+                // to handle composed vs decomposed forms of ä/õ/ö etc.
                 Parameter param = firstElement.LookupParameter(paramName);
                 if (param == null)
                 {
+                    string paramNorm = paramName.Normalize(System.Text.NormalizationForm.FormC);
                     foreach (Parameter p in firstElement.Parameters)
                     {
-                        if (string.Equals(p.Definition?.Name, paramName, StringComparison.OrdinalIgnoreCase))
+                        string defName = p.Definition?.Name;
+                        if (defName == null) continue;
+                        if (string.Equals(
+                                defName.Normalize(System.Text.NormalizationForm.FormC),
+                                paramNorm,
+                                StringComparison.OrdinalIgnoreCase))
                         {
                             param = p;
                             break;
