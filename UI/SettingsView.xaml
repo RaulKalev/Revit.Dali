@@ -1,63 +1,145 @@
-<UserControl x:Class="Dali.UI.SettingsView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="400"
-             Background="{DynamicResource PrimaryBackgroundBrush}">
+<UserControl
+    x:Class="Dali.UI.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="500"
+    d:DesignWidth="400"
+    Background="{DynamicResource PrimaryBackgroundBrush}"
+    mc:Ignorable="d">
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Header -->
-            <RowDefinition Height="*"/>    <!-- Scrollable Content -->
-            <RowDefinition Height="Auto"/> <!-- Footer: Actions & Validation -->
+            <RowDefinition Height="Auto" /> 
+            <!--  Header  -->
+            <RowDefinition Height="*" />    
+            <!--  Scrollable Content  -->
+            <RowDefinition Height="Auto" /> 
+            <!--  Footer: Actions & Validation  -->
         </Grid.RowDefinitions>
-        
-        <TextBlock Grid.Row="0" Text="Settings" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}" Margin="0,0,0,10"/>
 
-        <!-- Middle: Scrollable Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,10">
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,10"
+            FontSize="20"
+            FontWeight="Bold"
+            Foreground="{DynamicResource ForegroundBrush}"
+            Text="Settings" />
+
+        <!--  Middle: Scrollable Content  -->
+        <ScrollViewer
+            Grid.Row="1"
+            Margin="0,0,0,10"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <!-- 1. Categories -->
-                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,5,15">
+                <!--  1. Categories  -->
+                <Border
+                    Margin="0,0,5,15"
+                    Padding="10"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
                     <StackPanel>
-                        <TextBlock Text="Included Categories" FontWeight="SemiBold" Foreground="{DynamicResource ForegroundBrush}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Lighting Fixtures" IsChecked="{Binding IsLightingFixturesSelected}" Foreground="{DynamicResource ForegroundBrush}" Margin="0,2"/>
-                        <CheckBox Content="Electrical Fixtures" IsChecked="{Binding IsElectricalFixturesSelected}" Foreground="{DynamicResource ForegroundBrush}" Margin="0,2"/>
-                        <CheckBox Content="Lighting Devices" IsChecked="{Binding IsLightingDevicesSelected}" Foreground="{DynamicResource ForegroundBrush}" Margin="0,2"/>
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            Text="Included Categories" />
+                        <CheckBox
+                            Margin="0,2"
+                            Content="Lighting Fixtures"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            IsChecked="{Binding IsLightingFixturesSelected}" />
+                        <CheckBox
+                            Margin="0,2"
+                            Content="Electrical Fixtures"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            IsChecked="{Binding IsElectricalFixturesSelected}" />
+                        <CheckBox
+                            Margin="0,2"
+                            Content="Lighting Devices"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            IsChecked="{Binding IsLightingDevicesSelected}" />
                     </StackPanel>
                 </Border>
 
-                <!-- 2. Parameter Mapping -->
-                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,5,15">
+                <!--  2. Parameter Mapping  -->
+                <Border
+                    Margin="0,0,5,15"
+                    Padding="10"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
                     <StackPanel>
-                        <TextBlock Text="Parameter Mapping" FontWeight="SemiBold" Foreground="{DynamicResource ForegroundBrush}" Margin="0,0,0,8"/>
-                        
-                        <TextBlock Text="Load (mA) - Type Parameter" Foreground="Gray" Margin="0,5,0,2"/>
-                        <TextBox Text="{Binding Settings.Param_Load}" Style="{DynamicResource CustomTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            Text="Parameter Mapping" />
 
-                        <TextBlock Text="Address Count - Type Parameter" Foreground="Gray" Margin="0,10,0,2"/>
-                        <TextBox Text="{Binding Settings.Param_AddressCount}" Style="{DynamicResource CustomTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                        <TextBlock
+                            Margin="0,5,0,2"
+                            Foreground="Gray"
+                            Text="Load (mA) - Type Parameter" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource CustomTextBoxStyle}"
+                            Text="{Binding Settings.Param_Load}" />
 
-                        <TextBlock Text="Line ID - Instance Parameter" Foreground="Gray" Margin="0,10,0,2"/>
-                        <TextBox Text="{Binding Settings.Param_LineId}" Style="{DynamicResource CustomTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                        <TextBlock
+                            Margin="0,10,0,2"
+                            Foreground="Gray"
+                            Text="Address Count - Type Parameter" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource CustomTextBoxStyle}"
+                            Text="{Binding Settings.Param_AddressCount}" />
 
-                        <TextBlock Text="Controller - Instance Parameter" Foreground="Gray" Margin="0,10,0,2"/>
-                        <TextBox Text="{Binding Settings.Param_Controller}" Style="{DynamicResource CustomTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                        <TextBlock
+                            Margin="0,10,0,2"
+                            Foreground="Gray"
+                            Text="Line ID - Instance Parameter" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource CustomTextBoxStyle}"
+                            Text="{Binding Settings.Param_LineId}" />
+
+                        <TextBlock
+                            Margin="0,10,0,2"
+                            Foreground="Gray"
+                            Text="Controller - Instance Parameter" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource CustomTextBoxStyle}"
+                            Text="{Binding Settings.Param_Controller}" />
                     </StackPanel>
                 </Border>
 
-                <!-- (DALI Limits section removed in Phase 6 - Controlled by DeviceManagerView) -->
+                <!--  (DALI Limits section removed in Phase 6 - Controlled by DeviceManagerView)  -->
 
-                <!-- 4. Validation Output -->
-                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,5,0">
+                <!--  4. Validation Output  -->
+                <Border
+                    Margin="0,0,5,0"
+                    Padding="10"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
                     <StackPanel>
-                        <TextBlock Text="{Binding ValidationStatus}" FontWeight="SemiBold" Foreground="{DynamicResource ForegroundBrush}" Margin="0,0,0,8"/>
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource ForegroundBrush}"
+                            Text="{Binding ValidationStatus}" />
                         <ItemsControl ItemsSource="{Binding ValidationMessages}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding}" Foreground="{DynamicResource ForegroundBrush}" Margin="2" TextWrapping="Wrap"/>
+                                    <TextBlock
+                                        Margin="2"
+                                        Foreground="{DynamicResource ForegroundBrush}"
+                                        Text="{Binding}"
+                                        TextWrapping="Wrap" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -66,10 +148,28 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Footer: Actions -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0">
-            <Button Command="{Binding ValidateSettingsCommand}" Content="Validate" Width="100" Margin="0,0,10,0" Style="{DynamicResource CustomActionButtonStyle}" Height="35" FontSize="13"/>
-            <Button Command="{Binding SaveSettingsCommand}" Content="Save" Width="100" Style="{DynamicResource CustomActionButtonStyle}" Height="35" FontSize="13"/>
+        <!--  Footer: Actions  -->
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="100"
+                Height="35"
+                Margin="0,0,10,0"
+                Command="{Binding ValidateSettingsCommand}"
+                Content="Validate"
+                FontSize="13"
+                Style="{DynamicResource CustomActionButtonStyle}" />
+            <Button
+                Width="100"
+                Height="35"
+                Margin="0"
+                Command="{Binding SaveSettingsCommand}"
+                Content="Save"
+                FontSize="13"
+                Style="{DynamicResource CustomActionButtonStyle}" />
         </StackPanel>
     </Grid>
 </UserControl>
