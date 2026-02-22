@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Dali.UI.ViewModels"
     d:DesignHeight="600"
-    d:DesignWidth="360"
+    d:DesignWidth="480"
     mc:Ignorable="d">
 
     <Grid>
@@ -15,172 +15,206 @@
             BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1,0,0,0">
 
-            <!-- Main scrollable content -->
             <ScrollViewer
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto">
 
-                <!-- ContentRoot hosts both the item stack and the connector canvas overlay -->
-                <Grid x:Name="ContentRoot" SizeChanged="ContentRoot_SizeChanged">
+                <StackPanel Margin="10,10,10,16">
 
-                    <!-- === Content stack === -->
-                    <StackPanel x:Name="ContentPanel" Margin="8,8,8,16">
+                    <!-- ====== Controller card ====== -->
+                    <Border
+                        Margin="0,0,0,14"
+                        Padding="12,10"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="#888888"
+                                Text="{Binding PanelName}" />
+                            <TextBlock
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource ForegroundBrush}"
+                                Text="{Binding ControllerName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="#777777"
+                                Text="{Binding DeviceModel}" />
+                        </StackPanel>
+                    </Border>
 
-                        <!-- Controller header card -->
-                        <Border
-                            Margin="0,0,0,10"
-                            Padding="10,8"
-                            Background="{DynamicResource PrimaryBackgroundBrush}"
-                            BorderBrush="#70babc"
-                            BorderThickness="0,0,0,2"
-                            CornerRadius="4">
-                            <StackPanel>
-                                <TextBlock
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Foreground="{DynamicResource ForegroundBrush}"
-                                    Text="{Binding PanelName}" />
-                                <TextBlock
-                                    FontSize="12"
-                                    Foreground="#CCCCCC"
-                                    Text="{Binding ControllerName}" />
-                                <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                                    <TextBlock
-                                        FontSize="11"
-                                        Foreground="#888888"
-                                        Text="{Binding DeviceModel}" />
-                                    <TextBlock
-                                        Margin="8,0,0,0"
-                                        FontSize="11"
-                                        Foreground="#888888"
-                                        Text="{Binding OutputCount, StringFormat='Outputs: {0}'}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
+                    <!-- ====== Output columns (horizontal, scrollable) ====== -->
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Disabled">
 
-                        <!-- Output rows -->
-                        <ItemsControl x:Name="OutputsItemsControl" ItemsSource="{Binding Outputs}">
+                        <ItemsControl ItemsSource="{Binding Outputs}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Margin" Value="0,0,10,0" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type vm:ControllerOutputVizVm}">
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="36" />   <!-- port column -->
-                                            <ColumnDefinition Width="*" />    <!-- line cards column -->
-                                        </Grid.ColumnDefinitions>
 
-                                        <!-- Port circle (left) -->
+                                    <!-- One output column: 116 px wide -->
+                                    <Grid Width="116">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />  <!-- OUT box -->
+                                            <RowDefinition Height="14" />    <!-- stem OUT -> first node -->
+                                            <RowDefinition Height="Auto" />  <!-- line name -->
+                                            <RowDefinition Height="*" />     <!-- device group nodes -->
+                                        </Grid.RowDefinitions>
+
+                                        <!-- OUT label box -->
                                         <Border
-                                            x:Name="PortBorder"
-                                            Grid.Column="0"
-                                            Width="28"
-                                            Height="28"
+                                            Grid.Row="0"
+                                            Padding="6,5"
                                             HorizontalAlignment="Center"
-                                            VerticalAlignment="Top"
-                                            Margin="0,6,0,0"
-                                            Background="{DynamicResource PrimaryBackgroundBrush}"
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="14"
-                                            Tag="{Binding OutputNumber}"
-                                            Loaded="OutputPort_Loaded"
-                                            ToolTip="{Binding OutputNumber, StringFormat='Output {0}'}">
+                                            CornerRadius="3"
+                                            MinWidth="54">
                                             <TextBlock
                                                 HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
                                                 FontSize="11"
-                                                FontWeight="Bold"
+                                                FontWeight="SemiBold"
                                                 Foreground="{DynamicResource ForegroundBrush}"
-                                                Text="{Binding OutputNumber}" />
+                                                Text="{Binding OutputLabel}" />
                                         </Border>
 
-                                        <!-- Line cards (right) -->
-                                        <ItemsControl Grid.Column="1" ItemsSource="{Binding Lines}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate DataType="{x:Type vm:DaliLineVizVm}">
-                                                    <Border
-                                                        Margin="6,2,0,2"
-                                                        Padding="8,6"
-                                                        Background="{DynamicResource PrimaryBackgroundBrush}"
-                                                        BorderBrush="{DynamicResource BorderBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="4"
-                                                        Tag="{Binding LineName}"
-                                                        Loaded="LineCard_Loaded">
-                                                        <StackPanel>
-                                                            <!-- Line header row -->
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*" />
-                                                                    <ColumnDefinition Width="Auto" />
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock
-                                                                    Grid.Column="0"
-                                                                    FontSize="12"
-                                                                    FontWeight="SemiBold"
-                                                                    Foreground="{DynamicResource ForegroundBrush}"
-                                                                    Text="{Binding LineName}"
-                                                                    TextTrimming="CharacterEllipsis" />
-                                                                <TextBlock
-                                                                    Grid.Column="1"
-                                                                    Margin="6,0,0,0"
-                                                                    FontSize="11"
-                                                                    Foreground="#888888"
-                                                                    Text="{Binding DeviceCountDisplay}" />
-                                                            </Grid>
+                                        <!-- Stem: OUT box down to first node -->
+                                        <Rectangle
+                                            Grid.Row="1"
+                                            Width="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Stretch"
+                                            Fill="#555555" />
 
-                                                            <!-- Device groups (always shown, empty means no groups yet) -->
-                                                            <ItemsControl
-                                                                Margin="0,4,0,0"
-                                                                ItemsSource="{Binding Groups}">
-                                                                <ItemsControl.ItemTemplate>
-                                                                    <DataTemplate DataType="{x:Type vm:DeviceGroupVizVm}">
-                                                                        <TextBlock
-                                                                            Margin="0,1"
-                                                                            FontSize="11"
-                                                                            Foreground="#AAAAAA"
-                                                                            Text="{Binding DisplayText}" />
-                                                                    </DataTemplate>
-                                                                </ItemsControl.ItemTemplate>
-                                                            </ItemsControl>
-                                                        </StackPanel>
-                                                    </Border>
+                                        <!-- Line name (small, italic) -->
+                                        <TextBlock
+                                            Grid.Row="2"
+                                            Margin="0,0,0,4"
+                                            HorizontalAlignment="Center"
+                                            FontSize="10"
+                                            FontStyle="Italic"
+                                            Foreground="#666666"
+                                            Text="{Binding FirstLine.LineName}"
+                                            TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding FirstLine}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <!-- Device group nodes -->
+                                        <ItemsControl Grid.Row="3" ItemsSource="{Binding FirstLine.Groups}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type vm:DeviceGroupVizVm}">
+                                                    <!--
+                                                        Layout: [param value] [circle-X node] [count tk.]
+                                                        Col widths: 46 + 24 + 46 = 116
+                                                        The center column carries the vertical stem line.
+                                                    -->
+                                                    <Grid Height="44">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="46" />
+                                                            <ColumnDefinition Width="24" />
+                                                            <ColumnDefinition Width="46" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <!-- Vertical stem (behind circle) -->
+                                                        <Rectangle
+                                                            Grid.Column="1"
+                                                            Width="1"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Stretch"
+                                                            Fill="#555555" />
+
+                                                        <!-- Schematic node: circle + X -->
+                                                        <Grid
+                                                            Grid.Column="1"
+                                                            Width="22"
+                                                            Height="22"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                            <!-- Background cuts the stem so the circle appears solid -->
+                                                            <Ellipse Fill="{DynamicResource SecondaryBackgroundBrush}" />
+                                                            <Ellipse Stroke="#AAAAAA" StrokeThickness="1.5" />
+                                                            <Canvas Width="22" Height="22">
+                                                                <Line X1="5" Y1="5" X2="17" Y2="17" Stroke="#AAAAAA" StrokeThickness="1.2" />
+                                                                <Line X1="17" Y1="5" X2="5" Y2="17" Stroke="#AAAAAA" StrokeThickness="1.2" />
+                                                            </Canvas>
+                                                        </Grid>
+
+                                                        <!-- Parameter value to the LEFT -->
+                                                        <TextBlock
+                                                            Grid.Column="0"
+                                                            Margin="0,0,5,0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            FontSize="11"
+                                                            Foreground="{DynamicResource ForegroundBrush}"
+                                                            Text="{Binding Key}"
+                                                            TextTrimming="CharacterEllipsis"
+                                                            ToolTip="{Binding Key}" />
+
+                                                        <!-- Count to the RIGHT -->
+                                                        <TextBlock
+                                                            Grid.Column="2"
+                                                            Margin="5,0,0,0"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            FontSize="11"
+                                                            Foreground="#AAAAAA"
+                                                            Text="{Binding CountLabel}" />
+                                                    </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
 
-                                        <!-- Empty output slot hint (no lines defined for this output) -->
+                                        <!-- Placeholder when output has no line assigned -->
                                         <TextBlock
-                                            Grid.Column="1"
-                                            Margin="10,9,0,0"
-                                            FontSize="11"
+                                            Grid.Row="3"
+                                            HorizontalAlignment="Center"
+                                            FontSize="10"
                                             FontStyle="Italic"
-                                            Foreground="#555555"
-                                            Text="(no line assigned)">
+                                            Foreground="#444444"
+                                            Text="&#x2014;">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Lines.Count}" Value="0">
+                                                        <DataTrigger Binding="{Binding FirstLine}" Value="{x:Null}">
                                                             <Setter Property="Visibility" Value="Visible" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
+
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                    </ScrollViewer>
 
-                    </StackPanel>
-
-                    <!-- Connector canvas overlay — same coordinate space as ContentRoot, no input capture -->
-                    <Canvas
-                        x:Name="ConnectorCanvas"
-                        IsHitTestVisible="False"
-                        ClipToBounds="False" />
-
-                </Grid>
+                </StackPanel>
             </ScrollViewer>
         </Border>
     </Grid>

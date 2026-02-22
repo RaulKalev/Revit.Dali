@@ -63,7 +63,7 @@ namespace Dali.UI
         {
             var w = (DaliWindow)d;
             bool open = (bool)e.NewValue;
-            w.VizPanelWidth = open ? 360.0 : 0.0;
+            w.VizPanelWidth = open ? 480.0 : 0.0;
             if (open) w.RebuildVisualization();
         }
 

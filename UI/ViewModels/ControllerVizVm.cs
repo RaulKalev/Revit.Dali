@@ -2,23 +2,27 @@ using System.Collections.ObjectModel;
 
 namespace Dali.UI.ViewModels
 {
-    /// <summary>Device group row in the line card (e.g. "Type A — 5 tk.").</summary>
+    /// <summary>Device group node in the schematic (e.g. "V1D" circle "5 tk.").</summary>
     public class DeviceGroupVizVm : BaseViewModel
     {
         private string _key;
         public string Key
         {
             get => _key;
-            set { SetProperty(ref _key, value); OnPropertyChanged(nameof(DisplayText)); }
+            set { SetProperty(ref _key, value); OnPropertyChanged(nameof(CountLabel)); }
         }
 
         private int _count;
         public int Count
         {
             get => _count;
-            set { SetProperty(ref _count, value); OnPropertyChanged(nameof(DisplayText)); }
+            set { SetProperty(ref _count, value); OnPropertyChanged(nameof(CountLabel)); }
         }
 
+        /// <summary>Shown to the right of the circle node, e.g. "5 tk."</summary>
+        public string CountLabel => $"{Count} tk.";
+
+        /// <summary>Kept for backwards compatibility.</summary>
         public string DisplayText => $"{Key} — {Count} tk.";
     }
 
@@ -51,17 +55,23 @@ namespace Dali.UI.ViewModels
         public ObservableCollection<DeviceGroupVizVm> Groups { get; } = new ObservableCollection<DeviceGroupVizVm>();
     }
 
-    /// <summary>One output port on the controller card, with its assigned line(s).</summary>
+    /// <summary>One output column in the schematic — output number and its assigned line.</summary>
     public class ControllerOutputVizVm : BaseViewModel
     {
         private int _outputNumber;
         public int OutputNumber
         {
             get => _outputNumber;
-            set => SetProperty(ref _outputNumber, value);
+            set { SetProperty(ref _outputNumber, value); OnPropertyChanged(nameof(OutputLabel)); }
         }
 
+        public string OutputLabel => $"OUT{OutputNumber}";
+
+        /// <summary>Collection of DALI lines on this output (usually 0 or 1).</summary>
         public ObservableCollection<DaliLineVizVm> Lines { get; } = new ObservableCollection<DaliLineVizVm>();
+
+        /// <summary>The first (and normally only) DALI line on this output. Null if none assigned.</summary>
+        public DaliLineVizVm FirstLine => Lines.Count > 0 ? Lines[0] : null;
     }
 
     /// <summary>Top-level controller visualization — panel name, controller name, outputs.</summary>
@@ -98,3 +108,4 @@ namespace Dali.UI.ViewModels
         public ObservableCollection<ControllerOutputVizVm> Outputs { get; } = new ObservableCollection<ControllerOutputVizVm>();
     }
 }
+
