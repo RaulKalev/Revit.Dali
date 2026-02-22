@@ -2,6 +2,7 @@ using Autodesk.Revit.DB;
 using Dali.Models;
 using Dali.Services.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Dali.Services
@@ -25,9 +26,31 @@ namespace Dali.Services
                 ValidateParameter(doc, settings.Param_Load, true, settings, result);
                 ValidateParameter(doc, settings.Param_AddressCount, true, settings, result);
 
-                // Validate Instance Parameter
+                // Validate Instance Parameters
                 ValidateParameter(doc, settings.Param_LineId, false, settings, result);
                 ValidateParameter(doc, settings.Param_Controller, false, settings, result);
+
+                // Validate visualization grouping parameters (optional — skip if empty)
+                if (!string.IsNullOrWhiteSpace(settings.DeviceGroupingParamFixtures))
+                {
+                    var fixtureCategories = new List<BuiltInCategory>
+                    {
+                        BuiltInCategory.OST_LightingFixtures,
+                        BuiltInCategory.OST_ElectricalFixtures
+                    };
+                    ValidateParameterForCategories(doc, settings.DeviceGroupingParamFixtures,
+                        false, fixtureCategories, "Lighting Fixtures / El. Fixtures", result);
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.DeviceGroupingParamDevices))
+                {
+                    var deviceCategories = new List<BuiltInCategory>
+                    {
+                        BuiltInCategory.OST_LightingDevices
+                    };
+                    ValidateParameterForCategories(doc, settings.DeviceGroupingParamDevices,
+                        false, deviceCategories, "Lighting Devices", result);
+                }
             }
             catch (Exception ex)
             {
@@ -85,6 +108,55 @@ namespace Dali.Services
             {
                 result.AddError($"Parameter '{paramName}' not found on any included categories (IsType: {isTypeParam}).");
             }
+        }
+
+        /// <summary>
+        /// Validates an instance parameter against a specific set of categories (not the full IncludedCategories list).
+        /// Used for grouping parameters that are category-specific.
+        /// </summary>
+        private void ValidateParameterForCategories(Document doc, string paramName, bool isTypeParam,
+            IEnumerable<BuiltInCategory> categories, string categoryLabel, ValidationResult result)
+        {
+            bool found = false;
+            foreach (var bic in categories)
+            {
+                var category = Category.GetCategory(doc, bic);
+                if (category == null) continue;
+
+                var collector = new FilteredElementCollector(doc).OfCategoryId(category.Id);
+                if (isTypeParam)
+                    collector.WhereElementIsElementType();
+                else
+                    collector.WhereElementIsNotElementType();
+
+                var firstElement = collector.FirstElement();
+                if (firstElement == null) continue;
+
+                // Exact match first, then case-insensitive fallback (mirrors FetchLineDeviceGroupsRequest)
+                Parameter param = firstElement.LookupParameter(paramName);
+                if (param == null)
+                {
+                    foreach (Parameter p in firstElement.Parameters)
+                    {
+                        if (string.Equals(p.Definition?.Name, paramName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            param = p;
+                            break;
+                        }
+                    }
+                }
+
+                if (param != null)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+                result.AddSuccess($"Grouping parameter '{paramName}' found ({categoryLabel}).");
+            else
+                result.AddError($"Grouping parameter '{paramName}' not found on {categoryLabel}.");
         }
     }
 }
