@@ -99,13 +99,15 @@ namespace Dali.Services.Revit
                     string groupVal = "(Tühi)";
                     if (!string.IsNullOrWhiteSpace(paramName))
                     {
-                        // Exact-name lookup first (fast); fall back to case-insensitive,
-                        // Unicode-normalized scan to handle composed/decomposed ä/õ/ö etc.
-                        Parameter gp = elem.LookupParameter(paramName);
-                        if (gp == null)
+                        string paramNorm = paramName.Normalize(System.Text.NormalizationForm.FormC);
+
+                        // Helper: find parameter by exact name then NFC-normalized case-insensitive fallback.
+                        Parameter FindParam(Element source)
                         {
-                            string paramNorm = paramName.Normalize(System.Text.NormalizationForm.FormC);
-                            foreach (Parameter p in elem.Parameters)
+                            if (source == null) return null;
+                            Parameter p2 = source.LookupParameter(paramName);
+                            if (p2 != null) return p2;
+                            foreach (Parameter p in source.Parameters)
                             {
                                 string defName = p.Definition?.Name;
                                 if (defName == null) continue;
@@ -113,12 +115,21 @@ namespace Dali.Services.Revit
                                         defName.Normalize(System.Text.NormalizationForm.FormC),
                                         paramNorm,
                                         StringComparison.OrdinalIgnoreCase))
-                                {
-                                    gp = p;
-                                    break;
-                                }
+                                    return p;
                             }
+                            return null;
                         }
+
+                        // Check instance first, then fall back to the element type
+                        // (shared params are often type parameters — LookupParameter on an
+                        // instance will not find them; you must query the type element directly).
+                        Parameter gp = FindParam(elem);
+                        if (gp == null)
+                        {
+                            var elemType = doc.GetElement(elem.GetTypeId());
+                            gp = FindParam(elemType);
+                        }
+
                         if (gp != null && gp.HasValue)
                         {
                             string v = gp.StorageType == StorageType.String
