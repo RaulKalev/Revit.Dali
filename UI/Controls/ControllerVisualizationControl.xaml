@@ -46,25 +46,25 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- ====== Output columns (wrapping, no horizontal scroll) ====== -->
+                    <!-- ====== Output columns (single row, uniform width) ====== -->
                     <ItemsControl ItemsSource="{Binding Outputs}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" />
+                                <UniformGrid Rows="1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemContainerStyle>
                             <Style TargetType="ContentPresenter">
-                                <Setter Property="Margin" Value="0,0,10,10" />
+                                <Setter Property="Margin" Value="0,0,6,0" />
                             </Style>
                         </ItemsControl.ItemContainerStyle>
 
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:ControllerOutputVizVm}">
 
-                                <!-- One output column: 116 px wide -->
-                                <Grid Width="116">
+                                <!-- One output column (width fills uniformly) -->
+                                <Grid MinWidth="80">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />  <!-- Line name box -->
                                         <RowDefinition Height="*" />     <!-- device group nodes -->
