@@ -111,52 +111,62 @@ namespace Dali.Services
         }
 
         /// <summary>
-        /// Validates an instance parameter against a specific set of categories (not the full IncludedCategories list).
-        /// Used for grouping parameters that are category-specific.
+        /// Validates a parameter against a specific set of categories (not the full IncludedCategories list).
+        /// Scans ALL elements of each category (not just the first) because shared parameters may only exist
+        /// on some family types within the same category.
+        /// Checks both instances and element types so that Family Type shared params are also found.
         /// </summary>
         private void ValidateParameterForCategories(Document doc, string paramName, bool isTypeParam,
             IEnumerable<BuiltInCategory> categories, string categoryLabel, ValidationResult result)
         {
+            string paramNorm = paramName.Normalize(System.Text.NormalizationForm.FormC);
             bool found = false;
+
             foreach (var bic in categories)
             {
+                if (found) break;
                 var category = Category.GetCategory(doc, bic);
                 if (category == null) continue;
 
-                var collector = new FilteredElementCollector(doc).OfCategoryId(category.Id);
-                if (isTypeParam)
-                    collector.WhereElementIsElementType();
-                else
-                    collector.WhereElementIsNotElementType();
-
-                var firstElement = collector.FirstElement();
-                if (firstElement == null) continue;
-
-                // Exact match first, then case-insensitive + Unicode-normalized fallback
-                // to handle composed vs decomposed forms of ä/õ/ö etc.
-                Parameter param = firstElement.LookupParameter(paramName);
-                if (param == null)
+                // Check both instances and element types — shared params can be on either.
+                var passes = new[]
                 {
-                    string paramNorm = paramName.Normalize(System.Text.NormalizationForm.FormC);
-                    foreach (Parameter p in firstElement.Parameters)
+                    new FilteredElementCollector(doc).OfCategoryId(category.Id).WhereElementIsNotElementType(),
+                    new FilteredElementCollector(doc).OfCategoryId(category.Id).WhereElementIsElementType()
+                };
+
+                foreach (var collector in passes)
+                {
+                    if (found) break;
+                    foreach (Element elem in collector)
                     {
-                        string defName = p.Definition?.Name;
-                        if (defName == null) continue;
-                        if (string.Equals(
-                                defName.Normalize(System.Text.NormalizationForm.FormC),
-                                paramNorm,
-                                StringComparison.OrdinalIgnoreCase))
+                        // Exact name lookup first (fast path)
+                        Parameter param = elem.LookupParameter(paramName);
+
+                        // Fallback: case-insensitive + Unicode NFC scan
+                        if (param == null)
                         {
-                            param = p;
+                            foreach (Parameter p in elem.Parameters)
+                            {
+                                string defName = p.Definition?.Name;
+                                if (defName == null) continue;
+                                if (string.Equals(
+                                        defName.Normalize(System.Text.NormalizationForm.FormC),
+                                        paramNorm,
+                                        StringComparison.OrdinalIgnoreCase))
+                                {
+                                    param = p;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (param != null)
+                        {
+                            found = true;
                             break;
                         }
                     }
-                }
-
-                if (param != null)
-                {
-                    found = true;
-                    break;
                 }
             }
 
