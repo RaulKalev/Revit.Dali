@@ -116,6 +116,7 @@ namespace Dali.UI
 
             // Subscribe for visualization updates when active controller changes
             GroupingVM.PropertyChanged += GroupingVM_PropertyChanged;
+            GroupingVM.DevicesAssigned += GroupingVM_DevicesAssigned;
             _settingsService.OnSettingsSaved += SettingsService_OnSettingsSaved;
 
             DataContext = this;
@@ -418,6 +419,12 @@ namespace Dali.UI
         private void VizToggle_Click(object sender, RoutedEventArgs e)
         {
             IsVizOpen = !IsVizOpen;
+        }
+
+        private void GroupingVM_DevicesAssigned(object sender, EventArgs e)
+        {
+            if (IsVizOpen)
+                RebuildVisualization();
         }
 
         private void GroupingVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

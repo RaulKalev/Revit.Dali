@@ -67,6 +67,9 @@ namespace Dali.UI.ViewModels
 
         public string OutputLabel => $"OUT{OutputNumber}";
 
+        /// <summary>Text shown in the column header box: the line name when assigned, or "—" when the output is unused.</summary>
+        public string BoxLabel => FirstLine?.LineName is string n && n.Length > 0 ? n : "\u2014";
+
         /// <summary>Collection of DALI lines on this output (usually 0 or 1).</summary>
         public ObservableCollection<DaliLineVizVm> Lines { get; } = new ObservableCollection<DaliLineVizVm>();
 

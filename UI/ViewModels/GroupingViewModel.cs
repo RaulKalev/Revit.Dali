@@ -18,6 +18,8 @@ namespace Dali.UI.ViewModels
     /// </summary>
     public class GroupingViewModel : BaseViewModel
     {
+        /// <summary>Raised whenever devices are successfully assigned to a line (batch or interactive).</summary>
+        public event EventHandler DevicesAssigned;
         private readonly SettingsService _settingsService;
         private readonly RevitExternalEventService _eventService;
         private readonly HighlightRegistry _highlightRegistry;
@@ -658,6 +660,9 @@ namespace Dali.UI.ViewModels
             OnPropertyChanged(nameof(IsOverLoadLimit));
             OnPropertyChanged(nameof(IsOverAddressLimit));
 
+            if (result.Success)
+                DevicesAssigned?.Invoke(this, EventArgs.Empty);
+
             // Force a true recalculation of the line to catch the full total
             if (_pendingLine != null && result.Success)
             {
@@ -761,6 +766,7 @@ namespace Dali.UI.ViewModels
             {
                 RecalculateLine(line);
             }
+            DevicesAssigned?.Invoke(this, EventArgs.Empty);
         }
     }
 }

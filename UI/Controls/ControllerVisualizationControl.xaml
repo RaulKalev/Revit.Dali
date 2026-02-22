@@ -46,84 +46,59 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- ====== Output columns (horizontal, scrollable) ====== -->
-                    <ScrollViewer
-                        HorizontalScrollBarVisibility="Auto"
-                        VerticalScrollBarVisibility="Disabled">
+                    <!-- ====== Output columns (wrapping, no horizontal scroll) ====== -->
+                    <ItemsControl ItemsSource="{Binding Outputs}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                        <ItemsControl ItemsSource="{Binding Outputs}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Margin" Value="0,0,10,10" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
 
-                            <ItemsControl.ItemContainerStyle>
-                                <Style TargetType="ContentPresenter">
-                                    <Setter Property="Margin" Value="0,0,10,0" />
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ControllerOutputVizVm}">
 
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:ControllerOutputVizVm}">
+                                <!-- One output column: 116 px wide -->
+                                <Grid Width="116">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />  <!-- Line name box -->
+                                        <RowDefinition Height="14" />    <!-- stem box -> first node -->
+                                        <RowDefinition Height="*" />     <!-- device group nodes -->
+                                    </Grid.RowDefinitions>
 
-                                    <!-- One output column: 116 px wide -->
-                                    <Grid Width="116">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />  <!-- OUT box -->
-                                            <RowDefinition Height="14" />    <!-- stem OUT -> first node -->
-                                            <RowDefinition Height="Auto" />  <!-- line name -->
-                                            <RowDefinition Height="*" />     <!-- device group nodes -->
-                                        </Grid.RowDefinitions>
-
-                                        <!-- OUT label box -->
-                                        <Border
-                                            Grid.Row="0"
-                                            Padding="6,5"
-                                            HorizontalAlignment="Center"
-                                            BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="3"
-                                            MinWidth="54">
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                FontSize="11"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource ForegroundBrush}"
-                                                Text="{Binding OutputLabel}" />
-                                        </Border>
-
-                                        <!-- Stem: OUT box down to first node -->
-                                        <Rectangle
-                                            Grid.Row="1"
-                                            Width="1"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Stretch"
-                                            Fill="#555555" />
-
-                                        <!-- Line name (small, italic) -->
+                                    <!-- Line name box (replaces OUT label) -->
+                                    <Border
+                                        Grid.Row="0"
+                                        Padding="6,5"
+                                        HorizontalAlignment="Center"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="3"
+                                        MinWidth="54">
                                         <TextBlock
-                                            Grid.Row="2"
-                                            Margin="0,0,0,4"
                                             HorizontalAlignment="Center"
-                                            FontSize="10"
-                                            FontStyle="Italic"
-                                            Foreground="#666666"
-                                            Text="{Binding FirstLine.LineName}"
-                                            TextTrimming="CharacterEllipsis">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding FirstLine}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                            FontSize="11"
+                                            FontWeight="SemiBold"
+                                            Foreground="{DynamicResource ForegroundBrush}"
+                                            Text="{Binding BoxLabel}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </Border>
 
-                                        <!-- Device group nodes -->
-                                        <ItemsControl Grid.Row="3" ItemsSource="{Binding FirstLine.Groups}">
+                                    <!-- Stem: box down to first node -->
+                                    <Rectangle
+                                        Grid.Row="1"
+                                        Width="1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Stretch"
+                                        Fill="#555555" />
+
+                                    <!-- Device group nodes -->
+                                    <ItemsControl Grid.Row="2" ItemsSource="{Binding FirstLine.Groups}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="{x:Type vm:DeviceGroupVizVm}">
                                                     <!--
@@ -188,31 +163,30 @@
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
 
-                                        <!-- Placeholder when output has no line assigned -->
-                                        <TextBlock
-                                            Grid.Row="3"
-                                            HorizontalAlignment="Center"
-                                            FontSize="10"
-                                            FontStyle="Italic"
-                                            Foreground="#444444"
-                                            Text="&#x2014;">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding FirstLine}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                    <!-- Placeholder when output has no line assigned -->
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        HorizontalAlignment="Center"
+                                        FontSize="10"
+                                        FontStyle="Italic"
+                                        Foreground="#444444"
+                                        Text="&#x2014;">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FirstLine}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
 
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                 </StackPanel>
             </ScrollViewer>
