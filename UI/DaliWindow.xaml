@@ -203,6 +203,7 @@
                     Grid.RowSpan="2"
                     Grid.Column="1"
                     Width="{Binding VizPanelWidth, RelativeSource={RelativeSource AncestorType=Window}}"
+                    CornerRadius="0,10,10,0"
                     ClipToBounds="True">
                     <controls:ControllerVisualizationControl
                         x:Name="ControllerVizControl"

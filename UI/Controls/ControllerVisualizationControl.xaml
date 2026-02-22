@@ -14,7 +14,9 @@
         <Border
             Background="{DynamicResource SecondaryBackgroundBrush}"
             BorderBrush="{DynamicResource BorderBrush}"
-            BorderThickness="1,0,0,0">
+            BorderThickness="1,0,0,0"
+            CornerRadius="0,8,8,0"
+            ClipToBounds="True">
 
             <ScrollViewer
                 HorizontalScrollBarVisibility="Disabled"
