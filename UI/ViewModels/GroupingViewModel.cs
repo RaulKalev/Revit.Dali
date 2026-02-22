@@ -130,7 +130,8 @@ namespace Dali.UI.ViewModels
                 (ctrl, oldN) => OnControllerNameChanged(ctrl, oldN),
                 (line, oldN) => OnLineNameChanged(line, oldN),
                 line => OnChangeLineColor(line),
-                (ctrl, oldD) => OnControllerDeviceChanged(ctrl, oldD));
+                (ctrl, oldD) => OnControllerDeviceChanged(ctrl, oldD),
+                line => OnHighlightLine(line));
             return vm;
         }
 
@@ -663,6 +664,31 @@ namespace Dali.UI.ViewModels
                 RecalculateLine(_pendingLine);
             }
             _pendingLine = null;
+        }
+
+        // ---- HighlightLine ----
+
+        private void OnHighlightLine(LineViewModel line)
+        {
+            if (line == null || string.IsNullOrWhiteSpace(line.Name)) return;
+
+            var settings = _settingsService.Load();
+            if (settings.IncludedCategories == null || settings.IncludedCategories.Count == 0)
+            { StatusMessage = "No categories configured in Settings."; return; }
+
+            StatusMessage = $"Highlighting '{line.Name}'...";
+
+            var request = new Dali.Services.Revit.HighlightLineRequest(
+                settings,
+                _highlightRegistry,
+                line.PanelName,
+                line.ControllerName,
+                line.ControllerModelName,
+                line.Name,
+                line.ColorHex,
+                msg => StatusMessage = msg);
+
+            _eventService.Raise(request);
         }
 
         // ---- ResetOverrides ----

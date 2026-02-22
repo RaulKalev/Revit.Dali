@@ -14,37 +14,42 @@ namespace Dali.UI.ViewModels
         private readonly Action<LineViewModel> _interactiveAddAction;
         private readonly Action<LineViewModel, string> _onNameChanged;
         private readonly Action<LineViewModel> _changeColorAction;
+        private readonly Action<LineViewModel> _highlightAction;
 
         public LineViewModel(
             string panelName,
             string controllerModelName,
-            LineDefinition model, 
-            Action<LineViewModel> addToLineAction, 
+            LineDefinition model,
+            Action<LineViewModel> addToLineAction,
                              Action<LineViewModel> deleteAction,
                              Action<LineViewModel> interactiveAddAction = null,
                              Action<LineViewModel, string> onNameChanged = null,
-                             Action<LineViewModel> changeColorAction = null)
+                             Action<LineViewModel> changeColorAction = null,
+                             Action<LineViewModel> highlightAction = null)
         {
             _panelName = panelName ?? string.Empty;
             _controllerModelName = controllerModelName ?? string.Empty;
             _model = model ?? throw new ArgumentNullException(nameof(model));
-            
+
             _addToLineAction = addToLineAction;
             _deleteAction = deleteAction;
             _interactiveAddAction = interactiveAddAction;
             _onNameChanged = onNameChanged;
             _changeColorAction = changeColorAction;
+            _highlightAction = highlightAction;
 
             AddToLineCommand = new RelayCommand(_ => _addToLineAction?.Invoke(this));
             DeleteCommand = new RelayCommand(_ => _deleteAction?.Invoke(this));
             AddInteractiveCommand = new RelayCommand(_ => _interactiveAddAction?.Invoke(this));
             ChangeColorCommand = new RelayCommand(_ => _changeColorAction?.Invoke(this));
+            HighlightCommand = new RelayCommand(_ => _highlightAction?.Invoke(this));
         }
 
         public ICommand AddToLineCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand AddInteractiveCommand { get; }
         public ICommand ChangeColorCommand { get; }
+        public ICommand HighlightCommand { get; }
 
         public LineDefinition Model => _model;
 

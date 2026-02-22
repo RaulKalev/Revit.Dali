@@ -25,6 +25,7 @@ namespace Dali.UI.ViewModels
         private readonly Action<LineViewModel, string> _onLineNameChanged;
         private readonly Action<LineViewModel> _changeColorAction;
         private readonly Action<ControllerViewModel, DeviceDto> _onDeviceChanged;
+        private readonly Action<LineViewModel> _highlightAction;
 
         public ControllerViewModel(
             string panelName,
@@ -38,7 +39,8 @@ namespace Dali.UI.ViewModels
             Action<ControllerViewModel, string> onNameChanged = null,
             Action<LineViewModel, string> onLineNameChanged = null,
             Action<LineViewModel> changeColorAction = null,
-            Action<ControllerViewModel, DeviceDto> onDeviceChanged = null)
+            Action<ControllerViewModel, DeviceDto> onDeviceChanged = null,
+            Action<LineViewModel> highlightAction = null)
         {
             _panelName = panelName ?? string.Empty;
             _model = model ?? throw new ArgumentNullException(nameof(model));
@@ -53,6 +55,7 @@ namespace Dali.UI.ViewModels
             _onLineNameChanged = onLineNameChanged;
             _changeColorAction = changeColorAction;
             _onDeviceChanged = onDeviceChanged;
+            _highlightAction = highlightAction;
 
             Lines = new ObservableCollection<LineViewModel>();
             foreach (var lineDef in model.Lines)
@@ -311,7 +314,8 @@ namespace Dali.UI.ViewModels
                 line => DeleteLine(line),
                 line => _interactiveAddAction?.Invoke(line),
                 (line, oldN) => { _onLineNameChanged?.Invoke(line, oldN); },
-                line => { _changeColorAction?.Invoke(line); });
+                line => { _changeColorAction?.Invoke(line); },
+                line => { _highlightAction?.Invoke(line); });
         }
 
         public ICommand AddLineCommand { get; }
