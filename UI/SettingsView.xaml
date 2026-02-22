@@ -133,12 +133,21 @@
                         <TextBlock
                             Margin="0,0,0,2"
                             Foreground="Gray"
-                            Text="Device Grouping Parameter (instance)" />
+                            Text="Grouping Parameter - Lighting Fixtures / El. Fixtures" />
                         <TextBox
                             HorizontalAlignment="Stretch"
                             Style="{DynamicResource CustomTextBoxStyle}"
-                            ToolTip="Parameter name used to group devices on each DALI line in the visualization panel."
-                            Text="{Binding Settings.DeviceGroupingParameterName}" />
+                            ToolTip="Instance parameter used to group Lighting Fixtures and Electrical Fixtures in the visualization."
+                            Text="{Binding Settings.DeviceGroupingParamFixtures}" />
+                        <TextBlock
+                            Margin="0,8,0,2"
+                            Foreground="Gray"
+                            Text="Grouping Parameter - Lighting Devices" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource CustomTextBoxStyle}"
+                            ToolTip="Instance parameter used to group Lighting Devices in the visualization."
+                            Text="{Binding Settings.DeviceGroupingParamDevices}" />
                     </StackPanel>
                 </Border>
 

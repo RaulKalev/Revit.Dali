@@ -466,7 +466,6 @@ namespace Dali.UI
             {
                 _externalEventService.Raise(new FetchLineDeviceGroupsRequest(
                     settings,
-                    settings.DeviceGroupingParameterName ?? string.Empty,
                     lineInfos));
             }
         }

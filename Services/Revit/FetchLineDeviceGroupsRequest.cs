@@ -22,25 +22,29 @@ namespace Dali.Services.Revit
     /// group them by the user-configured grouping parameter, and push the results
     /// back into the DaliLineVizVm instances.
     ///
-    /// Threading: Execute() runs on the Revit API thread, which is the UI thread
-    /// for ExternalEvent. Callback is invoked directly (no Dispatcher needed).
+    /// Lighting Fixtures and Electrical Fixtures use <see cref="SettingsModel.DeviceGroupingParamFixtures"/>.
+    /// Lighting Devices use <see cref="SettingsModel.DeviceGroupingParamDevices"/>.
+    ///
+    /// Threading: Execute() runs on the Revit API thread (ExternalEvent).
+    /// Callback is invoked directly — no Dispatcher needed.
     /// No document writes are performed.
     /// </summary>
     public class FetchLineDeviceGroupsRequest : IExternalEventRequest
     {
         private readonly SettingsModel _settings;
-        private readonly string _groupingParamName;
         private readonly List<LineDeviceGroupInfo> _lines;
         private readonly Action _completedCallback;
 
+        // Cache ElementId values for fast per-element category comparison — compatible with all Revit API versions.
+        private static readonly ElementId IdLightingFixtures   = new ElementId(BuiltInCategory.OST_LightingFixtures);
+        private static readonly ElementId IdElectricalFixtures = new ElementId(BuiltInCategory.OST_ElectricalFixtures);
+
         public FetchLineDeviceGroupsRequest(
             SettingsModel settings,
-            string groupingParamName,
             List<LineDeviceGroupInfo> lines,
             Action completedCallback = null)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            _groupingParamName = groupingParamName ?? string.Empty;
             _lines = lines ?? new List<LineDeviceGroupInfo>();
             _completedCallback = completedCallback;
         }
@@ -84,10 +88,18 @@ namespace Dali.Services.Revit
 
                     string lineKey = lineName.Trim();
 
+                    // Determine which grouping parameter to use based on the element's category.
+                    var catId = elem.Category?.Id;
+                    bool isFixture = catId != null &&
+                        (catId == IdLightingFixtures || catId == IdElectricalFixtures);
+                    string paramName = isFixture
+                        ? _settings.DeviceGroupingParamFixtures
+                        : _settings.DeviceGroupingParamDevices;
+
                     string groupVal = "(Tühi)";
-                    if (!string.IsNullOrWhiteSpace(_groupingParamName))
+                    if (!string.IsNullOrWhiteSpace(paramName))
                     {
-                        Parameter gp = elem.LookupParameter(_groupingParamName);
+                        Parameter gp = elem.LookupParameter(paramName);
                         if (gp != null && gp.HasValue)
                         {
                             string v = gp.StorageType == StorageType.String
